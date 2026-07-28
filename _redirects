@@ -1,0 +1,7 @@
+# API calls are forwarded to your backend server
+# Uncomment and update the URL after deploying your backend:
+
+# /api/*  https://your-backend.onrender.com/api/:splat  200
+
+# SPA fallback (not needed for multi-page app, but keeps options open)
+# /*  /index.html  404
