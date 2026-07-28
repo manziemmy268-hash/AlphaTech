@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: alphatech-api
+    runtime: node
+    repo: https://github.com/manziemmy268-hash/AlphaTech.git
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://alphatech-1y7.pages.dev
+      - key: MOMO_SUBSCRIPTION_KEY
+        value: your-momo-key-here
+      - key: PORT
+        value: 10000
