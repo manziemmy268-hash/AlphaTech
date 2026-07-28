@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Phonne offers premium smartphones, expert support, and a smooth shopping experience for buyers who want quality and reliability.">
+    <title>Phonne | Premium Smartphone Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/auth.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-mobile-alt"></i> Phonne
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li><a href="admin.html">Admin</a></li>
+                <li id="nav-auth-links"></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="search-bar">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; color: var(--secondary-color);"></i>
+                    <input type="text" placeholder="Search devices..." id="global-search">
+                </div>
+                <a href="cart.html" class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero reveal">
+            <div class="container float-animate">
+                <div class="hero-badge"><i class="fas fa-shield-check"></i> Trusted premium smartphones • Secure checkout</div>
+                <h1>Smartphones that feel as premium as they perform.</h1>
+                <p>Discover flagship devices, dependable support, and a buying experience designed to feel effortless from the first click.</p>
+                <div class="hero-actions">
+                    <a href="products.html" class="btn btn-primary">Shop Now</a>
+                    <a href="#featured" class="btn btn-secondary">Explore Catalog</a>
+                </div>
+                <div class="trust-bar">
+                    <span class="trust-pill"><i class="fas fa-box-open"></i> Fast delivery</span>
+                    <span class="trust-pill"><i class="fas fa-mobile-screen"></i> Verified stock</span>
+                    <span class="trust-pill"><i class="fas fa-lock"></i> Secure payments</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="featured" class="container reveal">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Curated collection</p>
+                    <h2 style="font-size: 2rem;">Featured devices</h2>
+                </div>
+                <a href="products.html" class="btn btn-secondary">Browse all devices</a>
+            </div>
+            <div class="product-grid" id="featured-products">
+                <!-- Products will be injected here by JS -->
+                <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading featured products...</p></div>
+            </div>
+        </section>
+
+        <section class="container reveal">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-star"></i>
+                    <h3>Premium selection</h3>
+                    <p>Choose from carefully curated smartphones built for performance, style, and everyday reliability.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>Friendly support</h3>
+                    <p>Need help choosing a device? Our team is here to make your decision simple and stress-free.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-truck-fast"></i>
+                    <h3>Confidence in every order</h3>
+                    <p>Enjoy transparent stock updates, dependable delivery, and a smooth checkout experience.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Phonne</h4>
+                    <p style="color: var(--secondary-color); font-size: 0.9rem;">The premium destination for the latest
+                        mobile technology. Quality guaranteed.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="products.html?brand=Apple">iPhone</a></li>
+                        <li><a href="products.html?brand=Samsung">Samsung</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:hello@phonne.com">Contact Us</a></li>
+                        <li><a href="products.html">Shipping Info</a></li>
+                        <li><a href="products.html">Returns & Warranty</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; <span id="site-year"></span> Phonne Store. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Inline script for home page specific logic to fetch featured products
+        document.addEventListener('DOMContentLoaded', async () => {
+            const data = await fetchProducts();
+            const featuredGrid = document.getElementById('featured-products');
+            featuredGrid.innerHTML = createSkeleton(3, 'card');
+
+            if (data.length === 0) {
+                featuredGrid.innerHTML = '<p>No products available right now.</p>';
+                return;
+            }
+
+            document.getElementById('site-year').textContent = new Date().getFullYear();
+
+            // Show last 3 products as featured (most recent)
+            data.slice().reverse().slice(0, 3).forEach(product => {
+                featuredGrid.innerHTML += `
+                    <div class="product-card reveal">
+                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" onerror="handleProductImageError(this)">
+                        <span class="product-brand">${product.brand}</span>
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">$${product.price}</p>
+                        <a href="product.html?id=${product.id}" class="btn btn-primary" style="width: 100%;">View Details</a>
+                    </div>
+                `;
+            });
+            setupScrollAnimations();
+        });
+    </script>
+</body>
+
+</html>

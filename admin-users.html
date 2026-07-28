@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users List | Admin Dashboard | Phonne</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/auth.js"></script>
+    <script>Auth.requireAdmin();</script>
+    <style>
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 2rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 3rem;
+            padding: 0 1rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+        }
+
+        .sidebar-menu a.active, .sidebar-menu a:hover {
+            background: rgba(0, 113, 227, 0.05);
+            color: var(--primary-color);
+        }
+
+        .admin-main {
+            padding: 3rem;
+            background: var(--bg-color);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .product-table-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .product-table-card { background: var(--card-bg); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 1rem;
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-admin { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .badge-user { background: rgba(52, 199, 89, 0.1); color: #34c759; }
+
+        .btn-sm { padding: 0.5rem 0.8rem; font-size: 0.8rem; border-radius: 8px; border: none; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .admin-main { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body style="background: var(--bg-color);">
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="index.html" class="sidebar-brand">
+                <i class="fas fa-mobile-alt"></i> Phonne
+            </a>
+            <nav class="sidebar-menu">
+                <a href="admin.html"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="admin-users.html" class="active"><i class="fas fa-users"></i> Users List</a>
+                <a href="products.html"><i class="fas fa-shopping-bag"></i> Live Store</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" onclick="Auth.logout()" style="margin-top: 5rem;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div>
+                    <h1 style="font-size: 2rem;">Users List</h1>
+                    <p style="color: var(--secondary-color);">Manage registered platform users.</p>
+                </div>
+            </header>
+
+            <div class="product-table-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.25rem;">Platform Users</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Join Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table">
+                        <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users', {
+                    headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
+                });
+                const users = await res.json();
+                renderUsersTable(users);
+            } catch (err) {
+                console.error('Users load error:', err);
+                document.getElementById('admin-users-table').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: red;">Failed to load users.</td></tr>';
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('admin-users-table');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>#${user.id}</td>
+                    <td><span style="font-weight: 500;">${user.username}</span></td>
+                    <td>${user.phone || '<span style="color:var(--secondary-color); font-style:italic;">No Phone</span>'}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${user.role.toUpperCase()}</span></td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <!-- Placeholder actions -->
+                            <button class="btn btn-sm" style="background: rgba(0, 113, 227, 0.05); color: var(--primary-color);">View Details</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "phonne",
+  "version": "1.0.0",
+  "description": "Phonne - Premium Smartphone Store",
+  "private": true,
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,158 @@
+document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+    }
+    loadOrderSummary();
+    setupForm();
+});
+
+async function loadOrderSummary() {
+    const itemsContainer = document.getElementById('checkout-items');
+    itemsContainer.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Calculating your order...</p></div>';
+
+    try {
+        const res = await fetch('/api/cart', {
+            headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
+        });
+        const cart = await res.json();
+        
+        if (cart.length === 0) {
+            window.location.href = 'products.html';
+            return;
+        }
+
+        let subtotal = 0;
+        itemsContainer.innerHTML = cart.map(item => {
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+            return `
+                <div class="checkout-item">
+                    <span class="checkout-item-name">${item.quantity}x ${item.name}</span>
+                    <span>$${itemTotal.toFixed(2)}</span>
+                </div>
+            `;
+        }).join('');
+
+        const tax = subtotal * 0.08;
+        const total = subtotal + tax;
+
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('btn-total').textContent = `$${total.toFixed(2)}`;
+
+        // Auto-fill from Auth
+        const user = Auth.getCurrentUser();
+        if (user) {
+            if (document.getElementById('email')) document.getElementById('email').value = user.email || '';
+            if (document.getElementById('fname')) document.getElementById('fname').value = user.username || '';
+        }
+    } catch (err) {
+        console.error('Checkout summary error:', err);
+    }
+}
+
+function setupForm() {
+    const form = document.getElementById('checkout-form');
+    const momoInput = document.getElementById('momo-phone');
+    if (momoInput) {
+        momoInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (form.checkValidity()) {
+            processCheckout();
+        }
+    });
+}
+
+async function processCheckout() {
+    const btn = document.getElementById('place-order-btn');
+    const formInputs = document.querySelectorAll('#checkout-form input');
+    
+    // UI Loading State
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Order...';
+    formInputs.forEach(input => input.disabled = true);
+
+    const fullName = `${document.getElementById('fname').value} ${document.getElementById('lname').value}`.trim();
+
+    try {
+        // Step 1: Create Order in DB
+        const orderRes = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Auth.getToken()}`
+            },
+            body: JSON.stringify({
+                shipping_name: fullName,
+                shipping_email: document.getElementById('email').value,
+                shipping_address: document.getElementById('address').value,
+                shipping_city: document.getElementById('city').value
+            })
+        });
+
+        const orderData = await orderRes.json();
+        if (!orderRes.ok) throw new Error(orderData.message || 'Order creation failed');
+
+        // Step 2: Initialize MoMo Payment
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing MoMo Payment...';
+        const payRes = await fetch('/pay', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Auth.getToken()}`
+            },
+            body: JSON.stringify({
+                phoneNumber: document.getElementById('momo-phone').value,
+                amount: orderData.totalAmount,
+                orderId: orderData.orderId
+            })
+        });
+
+        const payData = await payRes.json();
+        if (!payRes.ok) throw new Error(payData.error || 'Payment failed');
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Awaiting PIN approval on phone...';
+
+        // Step 3: Poll for Status
+        const pollInterval = setInterval(async () => {
+            try {
+                const statusRes = await fetch(`/status/${payData.referenceId}`);
+                const statusData = await statusRes.json();
+
+                if (statusData.status === 'SUCCESSFUL') {
+                    clearInterval(pollInterval);
+                    finishCheckout();
+                } else if (statusData.status === 'FAILED') {
+                    clearInterval(pollInterval);
+                    alert('MoMo Payment failed.');
+                    resetCheckout(btn, formInputs);
+                }
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        }, 2000);
+
+    } catch (err) {
+        console.error('Checkout Error:', err);
+        alert(err.message || 'An error occurred during checkout.');
+        resetCheckout(btn, formInputs);
+    }
+}
+
+function resetCheckout(btn, formInputs) {
+    btn.disabled = false;
+    btn.innerHTML = `Place Order - ${document.getElementById('btn-total').textContent}`;
+    formInputs.forEach(input => input.disabled = false);
+}
+
+function finishCheckout() {
+    updateCartCount(); // In app.js
+    document.getElementById('success-modal').style.display = 'flex';
+}

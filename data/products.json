@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "name": "iPhone 15 Pro",
+    "brand": "Apple",
+    "price": 999,
+    "image": "assets/images/iphone15.png",
+    "description": "The iPhone 15 Pro features a strong and light titanium design with new contoured edges, a new Action button, powerful camera upgrades, and A17 Pro for next-level performance and mobile gaming.",
+    "specs": {
+      "display": "6.1-inch Super Retina XDR",
+      "processor": "A17 Pro chip",
+      "camera": "48MP Main | 12MP Ultra Wide | 12MP Telephoto",
+      "battery": "Up to 23 hours video playback"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "price": 1299,
+    "image": "assets/images/s24.png",
+    "description": "Galaxy S24 Ultra features a stunning titanium exterior, a massive battery, and the most advanced AI-powered camera system in a smartphone.",
+    "specs": {
+      "display": "6.8-inch Dynamic AMOLED 2X",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "200MP Main | 50MP Telephoto | 12MP Ultra Wide",
+      "battery": "5000mAh with 45W charging"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Google Pixel 8 Pro",
+    "brand": "Google",
+    "price": 999,
+    "image": "assets/images/pixel8.png",
+    "description": "Pixel 8 Pro is the all-pro phone engineered by Google. It’s sleek, sophisticated, and has a powerful triple camera system.",
+    "specs": {
+      "display": "6.7-inch Super Actua display",
+      "processor": "Google Tensor G3",
+      "camera": "50MP Wide | 48MP Ultra Wide | 48MP Telephoto",
+      "battery": "Beyond 24-hour battery life"
+    }
+  },
+  {
+    "id": 4,
+    "name": "OnePlus 12",
+    "brand": "OnePlus",
+    "price": 799,
+    "image": "assets/images/oneplus12.png",
+    "description": "The OnePlus 12 features the latest Snapdragon 8 Gen 3, a brilliant 2K 120Hz ProXDR display, and 4th Gen Hasselblad Camera for Mobile.",
+    "specs": {
+      "display": "6.82-inch AMOLED",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "50MP Main | 64MP Periscope | 48MP Ultra Wide",
+      "battery": "5400mAh with 80W SUPERVOOC"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Xiaomi 14 Ultra",
+    "brand": "Xiaomi",
+    "price": 1199,
+    "image": "assets/images/xiaomi14.png",
+    "description": "Xiaomi 14 Ultra features a Leica Summilux optical lens and a 1-inch main camera for professional-grade photography.",
+    "specs": {
+      "display": "6.73-inch AMOLED",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "50MP Main | 50MP Telephoto | 50MP Periscope | 50MP Ultra Wide",
+      "battery": "5000mAh with 90W HyperCharge"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Samsung Galaxy S25 Ultra",
+    "brand": "Samsung",
+    "price": 1399,
+    "image": "assets/images/s25ultra.svg",
+    "description": "Galaxy S25 Ultra pushes premium Android performance further with sharper AI tools, an enhanced zoom system, and all-day battery confidence.",
+    "specs": {
+      "display": "6.8-inch Dynamic AMOLED 2X",
+      "processor": "Snapdragon 8 Elite",
+      "camera": "200MP Main | 50MP Telephoto | 12MP Ultra Wide",
+      "battery": "5200mAh with fast charging"
+    }
+  },
+  {
+    "id": 7,
+    "name": "iPhone 16 Pro",
+    "brand": "Apple",
+    "price": 1099,
+    "image": "assets/images/iphone16pro.svg",
+    "description": "iPhone 16 Pro refines Apple's best-selling formula with a brighter display, stronger efficiency, and a more capable camera system.",
+    "specs": {
+      "display": "6.3-inch Super Retina XDR",
+      "processor": "A18 Pro chip",
+      "camera": "48MP Main | 12MP Ultra Wide | 5x Telephoto",
+      "battery": "Up to 27 hours video playback"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Google Pixel 9 Pro",
+    "brand": "Google",
+    "price": 1049,
+    "image": "assets/images/pixel9pro.svg",
+    "description": "Pixel 9 Pro delivers clean software, smarter AI features, and excellent photography in a polished flagship design.",
+    "specs": {
+      "display": "6.7-inch LTPO OLED",
+      "processor": "Google Tensor G4",
+      "camera": "50MP Wide | 48MP Ultra Wide | 48MP Telephoto",
+      "battery": "All-day adaptive battery"
+    }
+  },
+  {
+    "id": 9,
+    "name": "OnePlus 13",
+    "brand": "OnePlus",
+    "price": 899,
+    "image": "assets/images/oneplus13.svg",
+    "description": "OnePlus 13 balances speed, fluidity, and fast charging with a premium finish and responsive 120Hz display.",
+    "specs": {
+      "display": "6.82-inch LTPO AMOLED",
+      "processor": "Snapdragon 8 Elite",
+      "camera": "50MP Main | 64MP Telephoto | 48MP Ultra Wide",
+      "battery": "6000mAh with 100W SUPERVOOC"
+    }
+  },
+  {
+    "id": 10,
+    "name": "Xiaomi 15 Ultra",
+    "brand": "Xiaomi",
+    "price": 1299,
+    "image": "assets/images/xiaomi15ultra.svg",
+    "description": "Xiaomi 15 Ultra is built for camera-first buyers who want pro-grade zoom, fast performance, and a luxurious finish.",
+    "specs": {
+      "display": "6.73-inch AMOLED",
+      "processor": "Snapdragon 8 Elite",
+      "camera": "50MP Main | 50MP Telephoto | 50MP Periscope | 50MP Ultra Wide",
+      "battery": "5200mAh with 120W charging"
+    }
+  }
+]

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse premium smartphones at Phonne with smart filters, detailed specs, and a fast, trustworthy shopping experience.">
+    <title>Store | Phonne</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/auth.js"></script>
+    <style>
+        .store-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .filters {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .filter-option input {
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+        }
+
+        .sort-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .sort-row select {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        @media (max-width: 900px) {
+            .store-layout {
+                grid-template-columns: 1fr;
+            }
+            .filters {
+                display: none; /* Hide filters on mobile or use a toggle */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-mobile-alt"></i> Phonne
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html" class="active" style="color: var(--primary-color);">Store</a></li>
+                <li><a href="admin.html">Admin</a></li>
+                <li id="nav-auth-links"></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="search-bar">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; color: var(--secondary-color);"></i>
+                    <input type="text" placeholder="Search devices..." id="global-search">
+                </div>
+                <a href="cart.html" class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding-top: calc(var(--navbar-height) + 2rem);">
+        <header>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Explore Devices</h1>
+            <p style="color: var(--secondary-color);">Browse premium smartphones freely, then sign in when you are ready to secure your purchase.</p>
+        </header>
+
+        <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilters()">
+            <i class="fas fa-sliders-h"></i> Filters
+        </button>
+
+        <div class="store-layout">
+            <aside class="filters" id="filters-sidebar">
+                <div class="filter-section">
+                    <h3>Brands</h3>
+                    <div id="brand-filters">
+                        <!-- Brand filters will be injected here -->
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Price Range</h3>
+                    <label class="filter-option">
+                        <input type="radio" name="price-range" value="all" checked> All Prices
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="price-range" value="0-500"> Under $500
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="price-range" value="500-1000"> $500 - $1000
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="price-range" value="1000plus"> Over $1000
+                    </label>
+                </div>
+
+                <button id="clear-filters" class="btn" style="color: var(--primary-color); padding: 0.5rem 0; font-size: 0.9rem;">
+                    Clear all filters
+                </button>
+            </aside>
+
+            <section class="store-content">
+                <div class="sort-row">
+                    <p><span id="product-count">0</span> products found</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span>Sort by:</span>
+                        <select id="sort-select">
+                            <option value="featured">Featured</option>
+                            <option value="low-high">Price: Low to High</option>
+                            <option value="high-low">Price: High to Low</option>
+                            <option value="name">Name (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="product-grid" id="products-list">
+                    <!-- Products will be injected here -->
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Discovering the best deals...</p></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                &copy; 2024 Phonne Store. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/products.js"></script>
+</body>
+</html>
