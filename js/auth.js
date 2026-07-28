@@ -4,8 +4,8 @@
  */
 
 const Auth = {
-    // API Base URL (relative — Express serves both frontend and API)
-    API_URL: '/api',
+    // API Base URL — uses global config or falls back to relative /api
+    API_URL: window.APP_API_URL ? window.APP_API_URL + '/api' : '/api',
 
     // Store token and user
     saveSession: function(token, user) {

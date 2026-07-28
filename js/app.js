@@ -42,7 +42,7 @@ function setupScrollAnimations() {
 }
 
 // Products are now managed by the backend
-const API_URL = '/api';
+const API_URL = window.APP_API_URL ? window.APP_API_URL + '/api' : '/api';
 
 async function fetchProducts() {
     try {

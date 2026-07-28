@@ -11,10 +11,10 @@ const fs = require('fs');
 
 const app = express();
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
-app.use(cors({
-    origin: ALLOWED_ORIGINS,
-    credentials: true,
-}));
+const corsOptions = ALLOWED_ORIGINS === '*'
+    ? { origin: '*' }
+    : { origin: ALLOWED_ORIGINS, credentials: true };
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve frontend files
