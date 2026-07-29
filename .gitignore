@@ -9,4 +9,3 @@ backend/cd
 Thumbs.db
 *.log
 tmp/
-js/config.js
