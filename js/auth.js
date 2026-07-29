@@ -133,8 +133,8 @@ const Auth = {
                 : '';
                 
             authLi.innerHTML = `
-                <div class="user-profile-dropdown">
-                    <a href="#" class="user-profile-toggle">
+                <div class="user-profile-dropdown" id="user-dropdown">
+                    <a href="#" class="user-profile-toggle" id="user-dropdown-toggle">
                         <i class="fas fa-user-circle"></i> Hi, ${user.username} <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </a>
                     <div class="dropdown-content">
@@ -144,6 +144,23 @@ const Auth = {
                     </div>
                 </div>
             `;
+
+            const toggle = document.getElementById('user-dropdown-toggle');
+            const dropdown = document.getElementById('user-dropdown');
+            if (toggle && dropdown) {
+                toggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const content = dropdown.querySelector('.dropdown-content');
+                    const isOpen = content.style.display === 'block';
+                    document.querySelectorAll('.dropdown-content').forEach(c => c.style.display = '');
+                    content.style.display = isOpen ? '' : 'block';
+                });
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.querySelector('.dropdown-content').style.display = '';
+                    }
+                });
+            }
         } else {
             authLi.innerHTML = `
                 <a href="login.html" class="nav-auth-btn">Login</a>

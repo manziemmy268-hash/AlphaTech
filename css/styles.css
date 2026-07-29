@@ -828,11 +828,115 @@ footer, .reviews-section, .related-products {
     contain-intrinsic-size: 500px;
 }
 
+body.nav-open {
+    overflow: hidden;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+}
+
+.quantity-btn {
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.admin-mobile-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .search-bar input {
+        font-size: 1rem;
+    }
+    .quantity-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    .admin-mobile-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border-color);
+        z-index: 999;
+        justify-content: space-around;
+        padding: 0.5rem 0;
+        backdrop-filter: blur(12px);
+    }
+    .admin-mobile-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        font-size: 0.65rem;
+        color: var(--secondary-color);
+        text-decoration: none;
+        padding: 0.3rem 0.5rem;
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+    }
+    .admin-mobile-nav a i {
+        font-size: 1.2rem;
+    }
+    .admin-mobile-nav a.active {
+        color: var(--primary-color);
+    }
+    body {
+        padding-bottom: 4rem;
+    }
+    .admin-main {
+        padding-bottom: 5rem;
+    }
+    table {
+        font-size: 0.8rem;
+    }
+    table th, table td {
+        padding: 0.5rem 0.4rem;
+        white-space: nowrap;
+    }
+    .cart-item {
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+    .cart-item img {
+        width: 70px;
+        height: 70px;
+    }
+    .qty-btn {
+        min-width: 36px;
+        min-height: 36px;
+    }
+}
+
 @media (max-width: 480px) {
     .product-grid {
         grid-template-columns: 1fr;
     }
     .stats-grid {
         grid-template-columns: 1fr 1fr;
+    }
+    .cart-item {
+        flex-wrap: wrap;
+    }
+    .cart-item .item-price {
+        width: auto;
+    }
+    .checkout-summary {
+        position: sticky;
+        bottom: 0;
+        background: var(--card-bg);
+        z-index: 10;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
+    .footer-content {
+        gap: 1.5rem;
     }
 }
