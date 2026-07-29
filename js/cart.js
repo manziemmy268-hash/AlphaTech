@@ -11,7 +11,7 @@ async function renderCart() {
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading your cart...</p></div>';
 
     try {
-        const res = await fetch('/api/cart', {
+        const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
         const cart = await res.json();

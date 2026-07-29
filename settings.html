@@ -211,7 +211,7 @@
             btn.innerHTML = 'Saving...';
 
             try {
-                const res = await fetch('/api/users/me', {
+                const res = await fetch(`${API_URL}/users/me`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -258,7 +258,7 @@
             btn.innerHTML = 'Deleting...';
 
             try {
-                const res = await fetch('/api/users/me', {
+                const res = await fetch(`${API_URL}/users/me`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

@@ -4,8 +4,10 @@
  */
 
 const Auth = {
-    // API Base URL — uses global config or falls back to relative /api
-    API_URL: window.APP_API_URL ? window.APP_API_URL + '/api' : '/api',
+    // API Base URL — evaluated lazily so config.js can load first
+    get API_URL() {
+        return window.APP_API_URL ? window.APP_API_URL + '/api' : '/api';
+    },
 
     // Store token and user
     saveSession: function(token, user) {

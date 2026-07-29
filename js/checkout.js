@@ -12,7 +12,7 @@ async function loadOrderSummary() {
     itemsContainer.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Calculating your order...</p></div>';
 
     try {
-        const res = await fetch('/api/cart', {
+        const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
         const cart = await res.json();
@@ -83,7 +83,7 @@ async function processCheckout() {
 
     try {
         // Step 1: Create Order in DB
-        const orderRes = await fetch('/api/orders', {
+        const orderRes = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',

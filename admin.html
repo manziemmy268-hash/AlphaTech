@@ -348,7 +348,7 @@
         async function loadDashboard() {
             try {
                 // Fetch Stats
-                const statsRes = await fetch('/api/admin/stats', {
+                const statsRes = await fetch(`${API_URL}/admin/stats`, {
                     headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
                 });
                 const stats = await statsRes.json();
@@ -375,7 +375,7 @@
 
         async function loadLowStockItems() {
             try {
-                const res = await fetch('/api/admin/low-stock', {
+                const res = await fetch(`${API_URL}/admin/low-stock`, {
                     headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
                 });
                 const items = await res.json();
@@ -589,7 +589,7 @@
 
                 try {
                     const method = editingId ? 'PUT' : 'POST';
-                    const url = editingId ? `/api/products/${editingId}` : '/api/products';
+                    const url = editingId ? `${API_URL}/products/${editingId}` : `${API_URL}/products`;
                     
                     const res = await fetch(url, {
                         method: method,
