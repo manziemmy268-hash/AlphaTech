@@ -1,12 +1,14 @@
-require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+const fs = require('fs');
+const path = require('path');
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
+
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
