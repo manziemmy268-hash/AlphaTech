@@ -31,7 +31,7 @@ async function renderCart() {
 
         container.innerHTML = cart.map(item => `
             <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${getProductImageSrc(item.image)}" alt="${item.name}" loading="lazy" width="80" height="80">
                 <div class="cart-item-info">
                     <h3>${item.name}</h3>
                     <p class="price">$${item.price}</p>

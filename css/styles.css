@@ -823,6 +823,11 @@ footer {
     }
 }
 
+footer, .reviews-section, .related-products {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px;
+}
+
 @media (max-width: 480px) {
     .product-grid {
         grid-template-columns: 1fr;

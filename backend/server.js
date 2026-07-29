@@ -72,8 +72,19 @@ app.use('/api/login', authLimiter);
 app.use('/api/forgot-password', authLimiter);
 app.use('/api', apiLimiter);
 
-// Static files
-app.use(express.static(path.join(__dirname, '..')));
+// Static files with caching
+const oneYear = 365 * 24 * 60 * 60 * 1000;
+const oneDay = 24 * 60 * 60 * 1000;
+app.use(express.static(path.join(__dirname, '..'), {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.svg') || filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.webp')) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+    }
+}));
 
 // ============================================
 // DATABASE

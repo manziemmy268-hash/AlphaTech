@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" href="assets/images/hero.png" as="image">
+    <link rel="dns-prefetch" href="https://alphatech-hu3y.onrender.com">
+    <link rel="preconnect" href="https://alphatech-hu3y.onrender.com">
     <script src="js/auth.js"></script>
 </head>
 
@@ -143,7 +146,7 @@
             data.slice().reverse().slice(0, 3).forEach(product => {
                 featuredGrid.innerHTML += `
                     <div class="product-card reveal">
-                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" onerror="handleProductImageError(this)">
+                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" loading="lazy" width="400" height="300" onerror="handleProductImageError(this)">
                         <span class="product-brand">${product.brand}</span>
                         <h3 class="product-name">${product.name}</h3>
                         <p class="product-price">$${product.price}</p>

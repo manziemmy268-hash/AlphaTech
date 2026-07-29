@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://alphatech-hu3y.onrender.com">
+    <link rel="preconnect" href="https://alphatech-hu3y.onrender.com">
     <script src="js/auth.js"></script>
     <style>
         .product-details {
@@ -231,7 +233,7 @@
             container.innerHTML = `
                 <div class="product-details">
                     <div class="product-gallery">
-                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" onerror="handleProductImageError(this)">
+                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" width="600" height="600" fetchpriority="high" onerror="handleProductImageError(this)">
                     </div>
                     <div class="product-info">
                         <div class="product-info-header">

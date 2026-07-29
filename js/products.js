@@ -127,7 +127,7 @@ function renderProducts() {
 
     list.innerHTML = filteredProducts.map(product => `
         <div class="product-card reveal">
-            <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" onerror="handleProductImageError(this)">
+            <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" loading="lazy" width="400" height="300" onerror="handleProductImageError(this)">
             <div style="padding: 0 1rem;">
                 <span class="product-brand">${product.brand}</span>
                 <h3 class="product-name" style="margin: 0.2rem 0;">${product.name}</h3>
