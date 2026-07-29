@@ -5,28 +5,75 @@ if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const app = express();
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
-const corsOptions = ALLOWED_ORIGINS === '*'
-    ? { origin: '*' }
-    : { origin: ALLOWED_ORIGINS, credentials: true };
-app.use(cors(corsOptions));
-app.use(express.json());
-
-app.use(express.static(path.join(__dirname, '..')));
+// JWT_SECRET is required
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set.');
+    process.exit(1);
+}
 
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-in-production';
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'UP', timestamp: new Date() });
+const app = express();
+
+// Trust Render's proxy
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false,
+}));
+
+// HTTPS redirect
+app.use((req, res, next) => {
+    if (isProduction && !req.secure && req.get('x-forwarded-proto') !== 'https') {
+        return res.redirect(301, `https://${req.get('host')}${req.originalUrl}`);
+    }
+    next();
 });
+
+// CORS
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
+app.use(cors(ALLOWED_ORIGINS === '*'
+    ? { origin: '*' }
+    : { origin: ALLOWED_ORIGINS, credentials: true }
+));
+
+app.use(express.json({ limit: '1mb' }));
+
+// Rate limiters
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { success: false, message: 'Too many requests. Please slow down.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.use('/api/register', authLimiter);
+app.use('/api/login', authLimiter);
+app.use('/api/forgot-password', authLimiter);
+app.use('/api', apiLimiter);
+
+// Static files
+app.use(express.static(path.join(__dirname, '..')));
 
 // ============================================
 // DATABASE
@@ -126,49 +173,45 @@ db.exec(`
     );
 `);
 
-console.log('✅ All 8 tables ready.');
+console.log('All 8 tables ready.');
 
 // Seed admin
-const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
-if (userCount.count === 0) {
+const adminCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
+if (adminCount.count === 0) {
     const hash = bcrypt.hashSync('admin123', 10);
     db.prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)")
         .run('Admin', 'admin@phonne.com', hash, 'admin');
-    console.log('✅ Default admin seeded (admin@phonne.com / admin123)');
+    console.log('Default admin seeded (admin@phonne.com / admin123)');
 }
 
 // Seed products
 const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get();
 if (productCount.count === 0) {
-    const productsPath = path.join(__dirname, '..', 'data', 'products.json');
     try {
-        const rawData = fs.readFileSync(productsPath, 'utf-8');
-        const products = JSON.parse(rawData);
-
+        const products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'products.json'), 'utf-8'));
         const brands = [...new Set(products.map(p => p.brand))];
         const categoryMap = {};
-        const insertCategory = db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)");
-        const getCategory = db.prepare("SELECT id FROM categories WHERE name = ?");
+        const insertCat = db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)");
+        const getCat = db.prepare("SELECT id FROM categories WHERE name = ?");
         const insertProduct = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
         brands.forEach(brand => {
-            insertCategory.run(brand);
-            const cat = getCategory.get(brand);
+            insertCat.run(brand);
+            const cat = getCat.get(brand);
             if (cat) categoryMap[brand] = cat.id;
         });
 
-        const insertMany = db.transaction(() => {
+        db.transaction(() => {
             products.forEach(p => {
                 insertProduct.run(p.name, p.brand, categoryMap[p.brand], p.price, p.description, p.image,
                     p.specs.processor, p.specs.display, p.specs.camera, p.specs.battery);
             });
-        });
-        insertMany();
+        })();
 
-        console.log(`✅ Seeded ${products.length} products and ${brands.length} categories.`);
+        console.log(`Seeded ${products.length} products and ${brands.length} categories.`);
     } catch (err) {
-        console.error('⚠️ Could not seed products:', err.message);
+        console.error('Could not seed products:', err.message);
     }
 }
 
@@ -194,6 +237,15 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validatePassword(password) {
+    if (!password || password.length < 8) return 'Password must be at least 8 characters.';
+    if (!/[a-zA-Z]/.test(password)) return 'Password must contain at least one letter.';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number.';
+    return null;
+}
+
 const canonBrands = { apple: 'Apple', samsung: 'Samsung', google: 'Google', oneplus: 'OnePlus', xiaomi: 'Xiaomi', nokia: 'Nokia', tecno: 'Tecno' };
 
 function normalizeName(v) { return typeof v === 'string' ? v.trim().replace(/\s+/g, ' ') : v; }
@@ -204,24 +256,36 @@ function normalizeBrand(v) {
 }
 function normalizeImage(v) { return typeof v === 'string' ? v.trim() : v; }
 
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'UP', timestamp: new Date() });
+});
+
 // ============================================
 // AUTH
 // ============================================
 app.post('/api/register', async (req, res) => {
     try {
         const { username, email, phone, password } = req.body;
-        if (!username || !email || !password) {
-            return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+        if (!username || !username.trim()) {
+            return res.status(400).json({ success: false, message: 'Name is required.' });
         }
+        if (!email || !EMAIL_RE.test(email)) {
+            return res.status(400).json({ success: false, message: 'A valid email address is required.' });
+        }
+        const pwErr = validatePassword(password);
+        if (pwErr) return res.status(400).json({ success: false, message: pwErr });
+
         const hash = await bcrypt.hash(password, 10);
         db.prepare("INSERT INTO users (username, email, phone, password_hash) VALUES (?, ?, ?, ?)")
-            .run(username, email, phone || null, hash);
+            .run(username.trim(), email.toLowerCase().trim(), phone || null, hash);
         res.json({ success: true, message: 'Registration successful! You can now login.' });
     } catch (err) {
         if (err.message.includes('UNIQUE constraint failed')) {
-            return res.status(400).json({ success: false, message: 'Email already registered.' });
+            return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
         }
-        res.status(500).json({ success: false, message: 'Database error.' });
+        console.error('Register error:', err);
+        res.status(500).json({ success: false, message: 'Registration failed. Please try again.' });
     }
 });
 
@@ -230,18 +294,28 @@ app.post('/api/login', async (req, res) => {
     if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
-    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-    if (!user) return res.status(400).json({ success: false, message: 'Invalid email or password.' });
+
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase().trim());
+    if (!user) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+    }
 
     const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) return res.status(400).json({ success: false, message: 'Invalid email or password.' });
+    if (!match) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+    }
 
     const token = jwt.sign(
         { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role },
         JWT_SECRET, { expiresIn: '24h' }
     );
-    delete user.password_hash;
-    res.json({ success: true, message: `Welcome back, ${user.username}!`, token, user });
+
+    res.json({
+        success: true,
+        message: `Welcome back, ${user.username}!`,
+        token,
+        user: { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role }
+    });
 });
 
 // ============================================
@@ -249,10 +323,16 @@ app.post('/api/login', async (req, res) => {
 // ============================================
 app.post('/api/forgot-password', (req, res) => {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email address is required.' });
+    if (!email || !EMAIL_RE.test(email)) {
+        return res.status(400).json({ success: false, message: 'A valid email address is required.' });
+    }
 
-    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-    if (!user) return res.status(404).json({ success: false, message: 'Email not registered.' });
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase().trim());
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+        return res.json({ success: true, message: 'If this email is registered, a password reset link will be sent.' });
+    }
 
     const token = uuidv4();
     const expiresAt = new Date(Date.now() + 3600000).toISOString();
@@ -260,25 +340,34 @@ app.post('/api/forgot-password', (req, res) => {
         .run(email, token, expiresAt);
 
     const resetLink = `${req.protocol}://${req.get('host')}/reset-password.html?token=${token}`;
-    console.log(`\n📧 [MOCK EMAIL] To: ${email} | Reset: ${resetLink}\n`);
+    console.log(`[EMAIL] To: ${email} | Reset: ${resetLink}`);
 
-    res.json({ success: true, message: 'A recovery link has been generated.', mockLink: resetLink });
+    res.json({ success: true, message: 'If this email is registered, a password reset link will be sent.' });
 });
 
 app.post('/api/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
-    if (!token || !newPassword) return res.status(400).json({ success: false, message: 'Token and new password are required.' });
+    if (!token || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Token and new password are required.' });
+    }
+
+    const pwErr = validatePassword(newPassword);
+    if (pwErr) return res.status(400).json({ success: false, message: pwErr });
 
     const resetData = db.prepare("SELECT * FROM password_resets WHERE token = ? AND expires_at > CURRENT_TIMESTAMP").get(token);
-    if (!resetData) return res.status(400).json({ success: false, message: 'Invalid or expired reset token.' });
+    if (!resetData) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired reset token.' });
+    }
 
     try {
         const hash = await bcrypt.hash(newPassword, 10);
-        db.prepare("UPDATE users SET password_hash = ? WHERE email = ?").run(hash, resetData.user_email);
-        db.prepare("DELETE FROM password_resets WHERE user_email = ?").run(resetData.user_email);
-        res.json({ success: true, message: 'Password has been successfully reset! You can now log in.' });
+        db.transaction(() => {
+            db.prepare("UPDATE users SET password_hash = ? WHERE email = ?").run(hash, resetData.user_email);
+            db.prepare("DELETE FROM password_resets WHERE user_email = ?").run(resetData.user_email);
+        })();
+        res.json({ success: true, message: 'Password has been reset successfully! You can now log in.' });
     } catch {
-        res.status(500).json({ success: false, message: 'Server error generating password.' });
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' });
     }
 });
 
@@ -292,9 +381,14 @@ app.put('/api/users/me', authenticateToken, async (req, res) => {
     const { username, phone, oldPassword, newPassword } = req.body;
     let hashToUpdate = user.password_hash;
 
-    if (oldPassword && newPassword) {
+    if (oldPassword || newPassword) {
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Both old and new password are required to change password.' });
+        }
         const match = await bcrypt.compare(oldPassword, user.password_hash);
-        if (!match) return res.status(400).json({ success: false, message: 'Incorrect old password.' });
+        if (!match) return res.status(403).json({ success: false, message: 'Incorrect current password.' });
+        const pwErr = validatePassword(newPassword);
+        if (pwErr) return res.status(400).json({ success: false, message: pwErr });
         hashToUpdate = await bcrypt.hash(newPassword, 10);
     }
 
@@ -307,7 +401,12 @@ app.put('/api/users/me', authenticateToken, async (req, res) => {
         JWT_SECRET, { expiresIn: '24h' }
     );
 
-    res.json({ success: true, message: 'Profile updated successfully!', token, user: { ...user, username: username || user.username, phone: updatedPhone, password_hash: undefined } });
+    res.json({
+        success: true,
+        message: 'Profile updated!',
+        token,
+        user: { id: user.id, username: username || user.username, email: user.email, phone: updatedPhone, role: user.role }
+    });
 });
 
 app.delete('/api/users/me', authenticateToken, async (req, res) => {
@@ -315,10 +414,10 @@ app.delete('/api/users/me', authenticateToken, async (req, res) => {
     if (!user) return res.status(500).json({ success: false, message: 'Database error.' });
 
     const match = await bcrypt.compare(req.body.password, user.password_hash);
-    if (!match) return res.status(400).json({ success: false, message: 'Incorrect password.' });
+    if (!match) return res.status(403).json({ success: false, message: 'Incorrect password.' });
 
     db.prepare("DELETE FROM users WHERE id = ?").run(req.user.id);
-    res.json({ success: true, message: 'Your account has been deleted permanently.' });
+    res.json({ success: true, message: 'Account deleted permanently.' });
 });
 
 // ============================================
@@ -348,7 +447,7 @@ app.post('/api/products', authenticateToken, requireAdmin, (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
             specs_processor, specs_display, specs_camera, specs_battery, stock || 10);
-    res.json({ success: true, id: result.lastInsertRowid, message: 'Product added successfully!' });
+    res.json({ success: true, id: result.lastInsertRowid, message: 'Product added!' });
 });
 
 app.put('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
@@ -359,7 +458,7 @@ app.put('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
     db.prepare(`UPDATE products SET name=?, brand=?, category_id=?, price=?, description=?, image=?, specs_processor=?, specs_display=?, specs_camera=?, specs_battery=?, stock=? WHERE id=?`)
         .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
             specs_processor, specs_display, specs_camera, specs_battery, stock, req.params.id);
-    res.json({ success: true, message: 'Product updated successfully!' });
+    res.json({ success: true, message: 'Product updated!' });
 });
 
 app.delete('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
@@ -383,15 +482,18 @@ app.get('/api/cart', authenticateToken, (req, res) => {
 
 app.post('/api/cart', authenticateToken, (req, res) => {
     const { product_id, quantity } = req.body;
+    if (!product_id || !Number.isInteger(Number(product_id))) {
+        return res.status(400).json({ success: false, message: 'Invalid product ID.' });
+    }
     db.prepare(`INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)
         ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = quantity + ?`)
-        .run(req.user.id, product_id, quantity || 1, quantity || 1);
+        .run(req.user.id, product_id, Math.max(1, Math.min(99, Number(quantity) || 1)), Math.max(1, Math.min(99, Number(quantity) || 1)));
     res.json({ success: true, message: 'Added to cart!' });
 });
 
 app.put('/api/cart/:id', authenticateToken, (req, res) => {
     db.prepare("UPDATE cart_items SET quantity = ? WHERE id = ? AND user_id = ?")
-        .run(req.body.quantity, req.params.id, req.user.id);
+        .run(Math.max(1, Math.min(99, Number(req.body.quantity) || 1)), req.params.id, req.user.id);
     res.json({ success: true, message: 'Cart updated.' });
 });
 
@@ -406,26 +508,27 @@ app.delete('/api/cart', authenticateToken, (req, res) => {
 });
 
 // ============================================
-// ORDERS (with proper transaction)
+// ORDERS
 // ============================================
 app.post('/api/orders', authenticateToken, (req, res) => {
     const { shipping_name, shipping_email, shipping_address, shipping_city } = req.body;
+    if (!shipping_name || !shipping_email || !shipping_address || !shipping_city) {
+        return res.status(400).json({ success: false, message: 'All shipping fields are required.' });
+    }
 
-    const placeOrder = db.transaction(() => {
+    const result = db.transaction(() => {
         const cartItems = db.prepare(`SELECT ci.quantity, p.id as product_id, p.price, p.stock, p.name
             FROM cart_items ci JOIN products p ON ci.product_id = p.id
             WHERE ci.user_id = ?`).all(req.user.id);
 
-        if (cartItems.length === 0) {
-            return { error: 'Cart is empty.' };
-        }
+        if (cartItems.length === 0) return { error: 'Cart is empty.' };
 
         const outOfStock = cartItems.filter(i => i.stock < i.quantity);
         if (outOfStock.length > 0) {
             return { error: `Insufficient stock for: ${outOfStock.map(i => i.name).join(', ')}` };
         }
 
-        const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+        const total = Number(cartItems.reduce((s, i) => s + Number(i.price) * i.quantity, 0).toFixed(2));
         const orderResult = db.prepare(`INSERT INTO orders (user_id, total_amount, shipping_name, shipping_email, shipping_address, shipping_city)
             VALUES (?, ?, ?, ?, ?, ?)`).run(req.user.id, total, shipping_name, shipping_email, shipping_address, shipping_city);
 
@@ -434,15 +537,14 @@ app.post('/api/orders', authenticateToken, (req, res) => {
         const updateStock = db.prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
 
         cartItems.forEach(item => {
-            insertItem.run(orderId, item.product_id, item.quantity, item.price);
+            insertItem.run(orderId, item.product_id, item.quantity, Number(item.price));
             updateStock.run(item.quantity, item.product_id);
         });
 
         db.prepare("DELETE FROM cart_items WHERE user_id = ?").run(req.user.id);
-        return { success: true, orderId, totalAmount: total, message: 'Order placed successfully!' };
-    });
+        return { success: true, orderId, totalAmount: total, message: 'Order placed!' };
+    })();
 
-    const result = placeOrder();
     if (result.error) return res.status(400).json({ success: false, message: result.error });
     res.json(result);
 });
@@ -461,7 +563,7 @@ app.get('/api/orders/:id', authenticateToken, (req, res) => {
     if (order.user_id !== req.user.id && req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Unauthorized' });
     }
-    order.items = db.prepare(`SELECT oi.*,         p.name, p.image, p.brand
+    order.items = db.prepare(`SELECT oi.*, p.name, p.image, p.brand
         FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?`).all(order.id);
     res.json(order);
 });
@@ -478,24 +580,25 @@ app.post('/pay', authenticateToken, async (req, res) => {
 
         const referenceId = uuidv4();
         db.prepare(`INSERT INTO transactions (order_id, reference_id, phone_number, amount, currency, status)
-            VALUES (?, ?, ?, ?, ?, 'PENDING')`).run(orderId || null, referenceId, phoneNumber, amount, currency);
+            VALUES (?, ?, ?, ?, ?, 'PENDING')`).run(orderId || null, referenceId, phoneNumber, Number(amount), currency);
 
-        console.log(`[MoMo] Payment ${amount} ${currency} for ${phoneNumber} | Ref: ${referenceId}`);
+        console.log(`[MoMo] ${amount} ${currency} for ${phoneNumber} | Ref: ${referenceId}`);
 
         res.status(202).json({
             status: 'PENDING',
             referenceId,
-            message: 'Payment request sent to phone. Waiting for PIN approval.'
+            message: 'Payment request sent. Check your phone to approve.'
         });
 
         setTimeout(() => {
-            db.prepare("UPDATE transactions SET status = 'SUCCESSFUL' WHERE reference_id = ?").run(referenceId);
-            if (orderId) {
-                db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(orderId);
-            }
-            console.log(`[MoMo] Payment ${referenceId} → SUCCESSFUL`);
+            db.transaction(() => {
+                db.prepare("UPDATE transactions SET status = 'SUCCESSFUL' WHERE reference_id = ?").run(referenceId);
+                if (orderId) {
+                    db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(orderId);
+                }
+            })();
+            console.log(`[MoMo] ${referenceId} -> SUCCESSFUL`);
         }, 5000);
-
     } catch (error) {
         console.error('Payment error:', error);
         res.status(500).json({ error: 'Payment initialization failed' });
@@ -521,6 +624,10 @@ app.post('/api/reviews', authenticateToken, (req, res) => {
     if (!product_id || !rating) {
         return res.status(400).json({ success: false, message: 'Product ID and rating are required.' });
     }
+    const r = Number(rating);
+    if (!Number.isInteger(r) || r < 1 || r > 5) {
+        return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5.' });
+    }
 
     const purchase = db.prepare(`SELECT 1 FROM orders o
         JOIN order_items oi ON o.id = oi.order_id
@@ -534,11 +641,11 @@ app.post('/api/reviews', authenticateToken, (req, res) => {
     const existing = db.prepare("SELECT id FROM reviews WHERE user_id = ? AND product_id = ?")
         .get(req.user.id, product_id);
     if (existing) {
-        return res.status(400).json({ success: false, message: 'You have already reviewed this product.' });
+        return res.status(409).json({ success: false, message: 'You have already reviewed this product.' });
     }
 
     db.prepare("INSERT INTO reviews (user_id, product_id, rating, comment) VALUES (?, ?, ?, ?)")
-        .run(req.user.id, product_id, rating, comment);
+        .run(req.user.id, product_id, r, comment || null);
     res.json({ success: true, message: 'Thank you for your review!' });
 });
 
@@ -569,11 +676,12 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, (req, res) => {
 // START
 // ============================================
 const server = app.listen(PORT, () => {
-    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📦 Database: SQLite (WAL mode)`);
-    console.log(`🔑 JWT Auth: Enabled`);
-    console.log(`💳 MoMo Pay: Mock Mode`);
-    console.log(`📡 Health: http://localhost:${PORT}/api/health\n`);
+    const mode = isProduction ? 'PRODUCTION' : 'DEVELOPMENT';
+    console.log(`\nServer running on http://localhost:${PORT} [${mode}]`);
+    console.log(`JWT Auth: Enabled`);
+    console.log(`Rate Limiting: Enabled`);
+    console.log(`Security Headers: Enabled`);
+    console.log(`HTTPS Redirect: ${isProduction ? 'Active' : 'Disabled (dev mode)'}\n`);
 });
 
 process.on('SIGINT', () => { server.close(() => process.exit(0)); });
