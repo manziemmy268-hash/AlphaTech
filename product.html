@@ -90,7 +90,6 @@
         .stock-low { background: #fff9db; color: #f08c00; }
         .stock-out { background: #fff5f5; color: #fa5252; }
 
-        /* Reviews Section */
         .reviews-section {
             margin-top: 5rem;
             padding-top: 3rem;
@@ -130,10 +129,14 @@
             margin: 1rem 0;
         }
 
-        .rating-input i:hover, 
+        .rating-input i:hover,
         .rating-input i.active { color: #fcc419; }
 
         @media (max-width: 768px) {
+            .product-detail {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+            }
             .product-details {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -170,7 +173,7 @@
     </nav>
 
     <main class="container reveal" style="padding-top: calc(var(--navbar-height) + 2rem);">
-        <div id="product-detail-container">
+        <div id="product-detail">
             <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading device details...</p></div>
         </div>
 
@@ -179,13 +182,12 @@
                 <h2>Customer Reviews</h2>
                 <div id="avg-rating-display"></div>
             </div>
-            
+
             <div id="reviews-list">
                 <p style="color: var(--secondary-color);">No reviews yet. Sign in after purchase to share your experience and help other buyers.</p>
             </div>
 
             <div id="write-review-container">
-                <!-- Will be shown only if user is verified buyer -->
             </div>
         </section>
     </main>
@@ -200,6 +202,13 @@
 
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/catalog/catalog-cache.js"></script>
+    <script src="js/catalog/catalog-api.js"></script>
+    <script src="js/catalog/catalog-state.js"></script>
+    <script src="js/catalog/catalog-ui.js"></script>
+    <script src="js/catalog/catalog-detail.js"></script>
+    <script src="js/catalog/catalog-recent.js"></script>
+    <script src="js/catalog/catalog.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const productId = getQueryParam('id');
@@ -207,86 +216,31 @@
                 window.location.href = 'products.html';
                 return;
             }
-            
+
             const product = await fetchProductById(productId);
             if (!product) {
-                document.getElementById('product-detail-container').innerHTML = '<h2>Product not found.</h2> <a href="products.html" class="btn btn-primary" style="margin-top: 1rem;">Back to Store</a>';
+                document.getElementById('product-detail').innerHTML = '<h2>Product not found.</h2> <a href="products.html" class="btn btn-primary" style="margin-top: 1rem;">Back to Store</a>';
                 return;
             }
-            renderProduct(product);
-        });
 
-        function renderProduct(product) {
-            const container = document.getElementById('product-detail-container');
-            
-            // Determine stock status
-            let stockClass = 'stock-in';
-            let stockText = 'In Stock';
-            if (product.stock === 0) {
-                stockClass = 'stock-out';
-                stockText = 'Out of Stock';
-            } else if (product.stock <= 3) {
-                stockClass = 'stock-low';
-                stockText = `Hurry! Only ${product.stock} left`;
+            if (product.review_count !== undefined) {
+                document.getElementById('avg-rating-display').innerHTML = renderStars(product.average_rating) + ' <span style="color: var(--secondary-color); font-size: 0.9rem;">' + (product.average_rating || 0).toFixed(1) + ' out of 5</span>';
             }
 
-            container.innerHTML = `
-                <div class="product-details">
-                    <div class="product-gallery">
-                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" width="600" height="600" fetchpriority="high" onerror="handleProductImageError(this)">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-info-header">
-                            <span class="stock-badge ${stockClass}">${stockText}</span><br>
-                            <span class="product-brand">${product.brand}</span>
-                            <h1>${product.name}</h1>
-                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                                ${renderStars(product.average_rating || 0)}
-                                <span style="color: var(--secondary-color); font-size: 0.9rem;">(${product.review_count || 0} reviews)</span>
-                            </div>
-                            <p class="price">$${product.price}</p>
-                        </div>
-                        
-                        <p style="color: var(--secondary-color); line-height: 1.8;">${product.description}</p>
-                        
-                        <div class="specs-grid">
-                            <div class="spec-item">
-                                <i class="fas fa-microchip"></i>
-                                <span>Processor</span>
-                                <p>${product.specs_processor || 'N/A'}</p>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-mobile-screen"></i>
-                                <span>Display</span>
-                                <p>${product.specs_display || 'N/A'}</p>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-camera"></i>
-                                <span>Camera</span>
-                                <p>${product.specs_camera || 'N/A'}</p>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-battery-full"></i>
-                                <span>Battery</span>
-                                <p>${product.specs_battery || 'N/A'}</p>
-                            </div>
-                        </div>
-
-                        <div class="actions">
-                            <button class="btn btn-primary" style="flex: 2; padding: 1.2rem;" 
-                                    onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                                ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                            </button>
-                            <button class="btn" style="flex: 1; border: 1px solid rgba(0,0,0,0.1);" onclick="addToWishlist(${product.id})">
-                                <i class="far fa-heart" id="wishlist-icon-${product.id}"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
             loadReviews(product.id);
             checkReviewEligibility(product.id);
+        });
+
+        function renderStars(rating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.round(rating)) {
+                    html += '<i class="fas fa-star"></i>';
+                } else {
+                    html += '<i class="far fa-star"></i>';
+                }
+            }
+            return html;
         }
 
         async function loadReviews(productId) {
@@ -294,7 +248,7 @@
             try {
                 const res = await fetch(`${API_URL}/products/${productId}/reviews`);
                 const reviews = await res.json();
-                
+
                 if (reviews.length > 0) {
                     reviewsList.innerHTML = reviews.map(r => `
                         <div class="review-card">
@@ -318,23 +272,17 @@
 
         async function checkReviewEligibility(productId) {
             if (!Auth.isLoggedIn()) return;
-            
+
             const container = document.getElementById('write-review-container');
-            
-            // Check if user has a paid order for this product
+
             try {
                 const res = await fetch(`${API_URL}/orders`, {
                     headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
                 });
                 const orders = await res.json();
-                
-                // Find if any paid order has this product
-                const hasPurchased = orders.some(o => 
-                    o.status === 'paid' && o.id // We need more detailed check here or use a dedicated endpoint
-                );
 
-                // For now, let's assume if they have any order, we show the form but the backend will enforce the product-specific check
-                // This is a "greedy" UI approach to encourage reviews
+                const hasPurchased = orders.some(o => o.status === 'paid' && o.id);
+
                 renderReviewForm(productId);
             } catch (err) {
                 console.error('Eligibility check failed:', err);
@@ -347,7 +295,7 @@
                 <div class="write-review-card">
                     <h3>Share Your Experience</h3>
                     <p style="font-size: 0.9rem; color: var(--secondary-color);">Only verified buyers can submit reviews.</p>
-                    
+
                     <div class="rating-input" id="rating-input">
                         <i class="far fa-star" data-value="1"></i>
                         <i class="far fa-star" data-value="2"></i>
@@ -355,14 +303,13 @@
                         <i class="far fa-star" data-value="4"></i>
                         <i class="far fa-star" data-value="5"></i>
                     </div>
-                    
+
                     <textarea id="review-comment" class="form-control" style="width: 100%; min-height: 100px; padding: 1rem; border-radius: 10px; border: 1px solid #dee2e6; margin-bottom: 1rem;" placeholder="What did you think of the device?"></textarea>
-                    
+
                     <button class="btn btn-primary" onclick="submitReview(${productId})">Submit Review</button>
                 </div>
             `;
 
-            // Star selection logic
             const stars = container.querySelectorAll('.rating-input i');
             let selectedRating = 0;
 
@@ -378,7 +325,7 @@
                     });
                     container.dataset.rating = selectedRating;
                 });
-                
+
                 star.addEventListener('mouseover', () => {
                     const val = parseInt(star.dataset.value);
                     stars.forEach((s, idx) => {
@@ -414,7 +361,7 @@
                     body: JSON.stringify({ product_id: productId, rating, comment })
                 });
                 const result = await res.json();
-                
+
                 if (result.success) {
                     showToast('Review submitted! Thank you.');
                     location.reload();
@@ -424,18 +371,6 @@
             } catch (err) {
                 showToast('Error submitting review.');
             }
-        }
-
-        function renderStars(rating) {
-            let starsHtml = '';
-            for (let i = 1; i <= 5; i++) {
-                if (i <= Math.round(rating)) {
-                    starsHtml += '<i class="fas fa-star"></i>';
-                } else {
-                    starsHtml += '<i class="far fa-star"></i>';
-                }
-            }
-            return starsHtml;
         }
     </script>
 </body>

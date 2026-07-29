@@ -68,9 +68,21 @@
                 </div>
                 <a href="products.html" class="btn btn-secondary">Browse all devices</a>
             </div>
-            <div class="product-grid" id="featured-products">
-                <!-- Products will be injected here by JS -->
+            <div class="products-grid" id="featured-products-grid">
                 <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading featured products...</p></div>
+            </div>
+        </section>
+
+        <section id="trending" class="container reveal">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Trending now</p>
+                    <h2 style="font-size: 2rem;">Most popular devices</h2>
+                </div>
+                <a href="products.html?sort=popular" class="btn btn-secondary">View all</a>
+            </div>
+            <div class="products-grid" id="trending-products-grid">
+                <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading trending products...</p></div>
             </div>
         </section>
 
@@ -128,33 +140,29 @@
 
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/catalog/catalog-cache.js"></script>
+    <script src="js/catalog/catalog-api.js"></script>
+    <script src="js/catalog/catalog-state.js"></script>
+    <script src="js/catalog/catalog-ui.js"></script>
+    <script src="js/catalog/catalog-detail.js"></script>
+    <script src="js/catalog/catalog-recent.js"></script>
+    <script src="js/catalog/catalog.js"></script>
     <script>
-        // Inline script for home page specific logic to fetch featured products
-        document.addEventListener('DOMContentLoaded', async () => {
-            const data = await fetchProducts();
-            const featuredGrid = document.getElementById('featured-products');
-            featuredGrid.innerHTML = createSkeleton(3, 'card');
-
-            if (data.length === 0) {
-                featuredGrid.innerHTML = '<p>No products available right now.</p>';
-                return;
+        document.getElementById('site-year').textContent = new Date().getFullYear();
+        document.addEventListener('DOMContentLoaded', async function() {
+            const trendingGrid = document.getElementById('trending-products-grid');
+            if (trendingGrid) {
+                try {
+                    const data = await CatalogAPI.getTrending(4);
+                    const products = data?.products || data || [];
+                    if (products.length) {
+                        trendingGrid.innerHTML = products.map(function(p) { return CatalogUI.card(p, { lazy: true }); }).join('');
+                        if (typeof setupScrollAnimations === 'function') setupScrollAnimations();
+                    }
+                } catch (err) {
+                    console.error('Trending load error:', err);
+                }
             }
-
-            document.getElementById('site-year').textContent = new Date().getFullYear();
-
-            // Show last 3 products as featured (most recent)
-            data.slice().reverse().slice(0, 3).forEach(product => {
-                featuredGrid.innerHTML += `
-                    <div class="product-card reveal">
-                        <img src="${getProductImageSrc(product.image)}" alt="${product.name}" class="product-image" loading="lazy" width="400" height="300" onerror="handleProductImageError(this)">
-                        <span class="product-brand">${product.brand}</span>
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-price">$${product.price}</p>
-                        <a href="product.html?id=${product.id}" class="btn btn-primary" style="width: 100%;">View Details</a>
-                    </div>
-                `;
-            });
-            setupScrollAnimations();
         });
     </script>
 </body>

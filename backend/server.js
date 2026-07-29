@@ -186,6 +186,41 @@ db.exec(`
 
 console.log('All 8 tables ready.');
 
+// ============================================
+// MIGRATIONS
+// ============================================
+try { db.exec("ALTER TABLE products ADD COLUMN sku TEXT"); } catch (e) {}
+try { db.exec("ALTER TABLE products ADD COLUMN badge TEXT DEFAULT NULL"); } catch (e) {}
+try { db.exec("ALTER TABLE products ADD COLUMN featured INTEGER DEFAULT 0"); } catch (e) {}
+try {
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS product_variants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            sku TEXT,
+            price REAL,
+            stock INTEGER DEFAULT 0,
+            image TEXT,
+            sort_order INTEGER DEFAULT 0,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS product_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL,
+            url TEXT NOT NULL,
+            alt TEXT,
+            sort_order INTEGER DEFAULT 0,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        );
+    `);
+} catch (e) { console.error('Migration error:', e.message); }
+
+// Generate SKUs for existing products
+db.prepare(`UPDATE products SET sku = 'PHN-' || printf('%04d', id) WHERE sku IS NULL`).run();
+
+console.log('Migrations applied.');
+
 // Seed admin
 const adminCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
 if (adminCount.count === 0) {
@@ -432,53 +467,174 @@ app.delete('/api/users/me', authenticateToken, async (req, res) => {
 });
 
 // ============================================
-// PRODUCTS
+// PRODUCT CATALOG
 // ============================================
-const productQuery = `SELECT p.*, c.name as category_name,
+const productCols = `p.id, p.name, p.brand, p.sku, p.badge, p.featured, p.price, p.description, p.image, p.stock,
+    p.specs_processor, p.specs_display, p.specs_camera, p.specs_battery, p.created_at,
+    c.name as category_name, c.id as category_id,
     (SELECT COUNT(*) FROM reviews WHERE product_id = p.id) as review_count,
-    (SELECT AVG(rating) FROM reviews WHERE product_id = p.id) as average_rating
-    FROM products p LEFT JOIN categories c ON p.category_id = c.id`;
+    (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE product_id = p.id) as average_rating`;
 
+const productJoins = `FROM products p LEFT JOIN categories c ON p.category_id = c.id`;
+
+// GET /api/products — paginated, searchable, filterable
 app.get('/api/products', (req, res) => {
-    res.json(db.prepare(`${productQuery} ORDER BY p.id`).all());
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
+    const offset = (page - 1) * limit;
+    const search = (req.query.search || '').trim();
+    const brand = (req.query.brand || '').trim();
+    const category = (req.query.category || '').trim();
+    const sort = (req.query.sort || 'created_at').trim();
+    const minPrice = parseFloat(req.query.minPrice);
+    const maxPrice = parseFloat(req.query.maxPrice);
+    const featured = req.query.featured;
+    const badge = (req.query.badge || '').trim();
+
+    let where = ['1=1'];
+    let params = [];
+
+    if (search) {
+        where.push("(p.name LIKE ? OR p.brand LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)");
+        const q = `%${search}%`;
+        params.push(q, q, q, q);
+    }
+    if (brand) {
+        where.push("p.brand = ?");
+        params.push(brand);
+    }
+    if (category) {
+        where.push("c.name = ?");
+        params.push(category);
+    }
+    if (!isNaN(minPrice)) {
+        where.push("p.price >= ?");
+        params.push(minPrice);
+    }
+    if (!isNaN(maxPrice)) {
+        where.push("p.price <= ?");
+        params.push(maxPrice);
+    }
+    if (featured === 'true' || featured === '1') {
+        where.push("p.featured = 1");
+    }
+    if (badge) {
+        where.push("p.badge = ?");
+        params.push(badge);
+    }
+
+    const whereClause = where.join(' AND ');
+
+    const countRow = db.prepare(`SELECT COUNT(*) as total ${productJoins} WHERE ${whereClause}`).get(...params);
+    const total = countRow.total;
+
+    const sortMap = {
+        'price_asc': 'p.price ASC',
+        'price_desc': 'p.price DESC',
+        'name_asc': 'p.name ASC',
+        'name_desc': 'p.name DESC',
+        'newest': 'p.created_at DESC',
+        'oldest': 'p.created_at ASC',
+        'rating': 'average_rating DESC',
+        'popular': '(SELECT COUNT(*) FROM order_items oi WHERE oi.product_id = p.id) DESC',
+    };
+    const orderBy = sortMap[sort] || 'p.created_at DESC';
+
+    const rows = db.prepare(`SELECT ${productCols} ${productJoins} WHERE ${whereClause} ORDER BY ${orderBy} LIMIT ? OFFSET ?`).all(...params, limit, offset);
+
+    const brandQuery = db.prepare(`SELECT p.brand, COUNT(*) as count FROM products p ${category ? `JOIN categories c ON p.category_id = c.id WHERE c.name = ?` : 'WHERE 1=1'} GROUP BY p.brand ORDER BY p.brand`);
+    const brands = category ? brandQuery.all(category) : brandQuery.all();
+    const categories = db.prepare("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) as product_count FROM categories c ORDER BY c.name").all();
+
+    res.json({
+        products: rows,
+        pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+        filters: { brands, categories },
+    });
 });
 
+// GET /api/products/featured
+app.get('/api/products/featured', (req, res) => {
+    const limit = Math.min(20, parseInt(req.query.limit) || 8);
+    res.json(db.prepare(`SELECT ${productCols} ${productJoins} WHERE p.featured = 1 ORDER BY p.created_at DESC LIMIT ?`).all(limit));
+});
+
+// GET /api/products/trending
+app.get('/api/products/trending', (req, res) => {
+    const limit = Math.min(20, parseInt(req.query.limit) || 8);
+    res.json(db.prepare(`SELECT ${productCols} ${productJoins}
+        ORDER BY (SELECT COUNT(*) FROM order_items oi WHERE oi.product_id = p.id) DESC, p.created_at DESC LIMIT ?`).all(limit));
+});
+
+// GET /api/products/related/:id
+app.get('/api/products/related/:id', (req, res) => {
+    const product = db.prepare("SELECT brand, category_id FROM products WHERE id = ?").get(req.params.id);
+    if (!product) return res.json([]);
+    const limit = Math.min(8, parseInt(req.query.limit) || 4);
+    res.json(db.prepare(`SELECT ${productCols} ${productJoins}
+        WHERE p.id != ? AND (p.brand = ? OR p.category_id = ?) ORDER BY p.created_at DESC LIMIT ?`)
+        .all(req.params.id, product.brand, product.category_id, limit));
+});
+
+// GET /api/products/:id — single product with variants and images
 app.get('/api/products/:id', (req, res) => {
-    const row = db.prepare(`${productQuery} WHERE p.id = ?`).get(req.params.id);
+    const row = db.prepare(`SELECT ${productCols} ${productJoins} WHERE p.id = ?`).get(req.params.id);
     if (!row) return res.status(404).json({ error: 'Product not found' });
+
+    row.variants = db.prepare("SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order").all(row.id);
+    row.gallery = db.prepare("SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order").all(row.id);
+    if (!row.gallery.length && row.image) {
+        row.gallery = [{ url: row.image, alt: row.name }];
+    }
+
     res.json(row);
 });
 
+// POST /api/products
 app.post('/api/products', authenticateToken, requireAdmin, (req, res) => {
-    const { name, brand, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock } = req.body;
+    const { name, brand, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured } = req.body;
     const nb = normalizeBrand(brand);
     db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)").run(nb);
     const cat = db.prepare("SELECT id FROM categories WHERE name = ?").get(nb);
-    const result = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    const result = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
-            specs_processor, specs_display, specs_camera, specs_battery, stock || 10);
-    res.json({ success: true, id: result.lastInsertRowid, message: 'Product added!' });
+            specs_processor, specs_display, specs_camera, specs_battery, stock || 10,
+            sku || null, badge || null, featured ? 1 : 0);
+    const id = result.lastInsertRowid;
+    if (!sku) {
+        db.prepare("UPDATE products SET sku = ? WHERE id = ?").run(`PHN-${String(id).padStart(4, '0')}`, id);
+    }
+    res.json({ success: true, id, message: 'Product added!' });
 });
 
+// PUT /api/products/:id
 app.put('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
-    const { name, brand, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock } = req.body;
+    const { name, brand, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured } = req.body;
     const nb = normalizeBrand(brand);
     db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)").run(nb);
     const cat = db.prepare("SELECT id FROM categories WHERE name = ?").get(nb);
-    db.prepare(`UPDATE products SET name=?, brand=?, category_id=?, price=?, description=?, image=?, specs_processor=?, specs_display=?, specs_camera=?, specs_battery=?, stock=? WHERE id=?`)
+    db.prepare(`UPDATE products SET name=?, brand=?, category_id=?, price=?, description=?, image=?,
+        specs_processor=?, specs_display=?, specs_camera=?, specs_battery=?, stock=?, sku=?, badge=?, featured=? WHERE id=?`)
         .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
-            specs_processor, specs_display, specs_camera, specs_battery, stock, req.params.id);
+            specs_processor, specs_display, specs_camera, specs_battery, stock, sku || null, badge || null, featured ? 1 : 0, req.params.id);
     res.json({ success: true, message: 'Product updated!' });
 });
 
+// DELETE /api/products/:id
 app.delete('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
     db.prepare("DELETE FROM products WHERE id = ?").run(req.params.id);
     res.json({ success: true, message: 'Product deleted.' });
 });
 
+// GET /api/categories — with product counts
 app.get('/api/categories', (req, res) => {
-    res.json(db.prepare("SELECT * FROM categories ORDER BY name").all());
+    res.json(db.prepare("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) as product_count FROM categories c ORDER BY c.name").all());
+});
+
+// GET /api/brands — with product counts
+app.get('/api/brands', (req, res) => {
+    res.json(db.prepare("SELECT brand as name, COUNT(*) as product_count FROM products GROUP BY brand ORDER BY brand").all());
 });
 
 // ============================================
