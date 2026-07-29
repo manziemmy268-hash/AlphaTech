@@ -173,6 +173,13 @@
     </nav>
 
     <main class="container reveal" style="padding-top: calc(var(--navbar-height) + 2rem);">
+        <nav aria-label="Breadcrumb" style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--secondary-color);">
+            <a href="index.html" style="color: var(--primary-color);">Home</a>
+            <span> / </span>
+            <a href="products.html" style="color: var(--primary-color);">Store</a>
+            <span> / </span>
+            <span id="breadcrumb-product-name" style="color: var(--text-color); font-weight: 500;">Product</span>
+        </nav>
         <div id="product-detail">
             <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading device details...</p></div>
         </div>
@@ -190,6 +197,8 @@
             <div id="write-review-container">
             </div>
         </section>
+
+        <div id="recent-products" style="margin-top: 3rem;"></div>
     </main>
 
     <footer>
