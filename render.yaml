@@ -3,7 +3,6 @@ services:
     name: alphatech-api
     runtime: node
     repo: https://github.com/manziemmy268-hash/AlphaTech.git
-    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:

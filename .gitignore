@@ -1,5 +1,4 @@
 node_modules/
-backend/node_modules/
 database.sqlite
 backend/database.sqlite
 backend/cd
