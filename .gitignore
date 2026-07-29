@@ -1,5 +1,7 @@
 node_modules/
 database.sqlite
+database.sqlite-shm
+database.sqlite-wal
 backend/database.sqlite
 backend/cd
 .env
