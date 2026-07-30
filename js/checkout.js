@@ -73,6 +73,7 @@ function setupForm() {
 async function processCheckout() {
     const btn = document.getElementById('place-order-btn');
     const formInputs = document.querySelectorAll('#checkout-form input');
+    const paymentBaseUrl = window.APP_API_URL || window.location.origin;
     
     // UI Loading State
     btn.disabled = true;
@@ -102,7 +103,7 @@ async function processCheckout() {
 
         // Step 2: Initialize MoMo Payment
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing MoMo Payment...';
-        const payRes = await fetch('/pay', {
+        const payRes = await fetch(`${paymentBaseUrl}/pay`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ async function processCheckout() {
         // Step 3: Poll for Status
         const pollInterval = setInterval(async () => {
             try {
-                const statusRes = await fetch(`/status/${payData.referenceId}`);
+                const statusRes = await fetch(`${paymentBaseUrl}/status/${payData.referenceId}`);
                 const statusData = await statusRes.json();
 
                 if (statusData.status === 'SUCCESSFUL') {

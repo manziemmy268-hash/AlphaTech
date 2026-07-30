@@ -62,7 +62,7 @@ async function updateQuantity(id, newQuantity) {
     }
     
     try {
-        await fetch(`/api/cart/${id}`, {
+        await fetch(`${API_URL}/cart/${id}`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ async function updateQuantity(id, newQuantity) {
 
 async function removeFromCart(id) {
     try {
-        await fetch(`/api/cart/${id}`, {
+        await fetch(`${API_URL}/cart/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
