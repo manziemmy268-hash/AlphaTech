@@ -147,7 +147,8 @@ async function addToCart(productId) {
         }
     } catch (err) {
         console.error('Cart add error:', err);
-        showToast('Server error adding to cart');
+        console.error('Cart add details:', { message: err.message, stack: err.stack, name: err.name });
+        showToast('Server error: ' + (err.message || 'Unable to add to cart'));
     }
 }
 
