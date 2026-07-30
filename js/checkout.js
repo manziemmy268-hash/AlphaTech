@@ -15,7 +15,7 @@ async function loadOrderSummary() {
         const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
-        const cart = await res.json();
+        const cart = await readJsonResponse(res, 'Unable to load checkout summary');
         
         if (cart.length === 0) {
             window.location.href = 'products.html';
@@ -98,7 +98,7 @@ async function processCheckout() {
             })
         });
 
-        const orderData = await orderRes.json();
+        const orderData = await readJsonResponse(orderRes, 'Order creation failed');
         if (!orderRes.ok) throw new Error(orderData.message || 'Order creation failed');
 
         // Step 2: Initialize MoMo Payment
@@ -116,7 +116,7 @@ async function processCheckout() {
             })
         });
 
-        const payData = await payRes.json();
+        const payData = await readJsonResponse(payRes, 'Payment failed');
         if (!payRes.ok) throw new Error(payData.error || 'Payment failed');
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Awaiting PIN approval on phone...';
@@ -125,7 +125,7 @@ async function processCheckout() {
         const pollInterval = setInterval(async () => {
             try {
                 const statusRes = await fetch(`${paymentBaseUrl}/status/${payData.referenceId}`);
-                const statusData = await statusRes.json();
+                const statusData = await readJsonResponse(statusRes, 'Unable to check payment status');
 
                 if (statusData.status === 'SUCCESSFUL') {
                     clearInterval(pollInterval);

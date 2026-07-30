@@ -78,6 +78,12 @@ const oneDay = 24 * 60 * 60 * 1000;
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '1d',
     setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            return;
+        }
         if (filePath.endsWith('.svg') || filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.webp')) {
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
@@ -85,6 +91,11 @@ app.use(express.static(path.join(__dirname, '..'), {
         }
     }
 }));
+
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+});
 
 // ============================================
 // DATABASE

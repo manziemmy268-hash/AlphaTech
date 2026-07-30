@@ -44,11 +44,35 @@ function setupScrollAnimations() {
 // Products are now managed by the backend
 const API_URL = window.APP_API_URL ? window.APP_API_URL + '/api' : '/api';
 
+async function readJsonResponse(res, fallbackMessage) {
+    const contentType = res.headers.get('content-type') || '';
+    const raw = await res.text();
+
+    if (!raw) {
+        if (res.ok) return null;
+        throw new Error(fallbackMessage || `Request failed with status ${res.status}`);
+    }
+
+    if (contentType.includes('application/json')) {
+        try {
+            return JSON.parse(raw);
+        } catch (err) {
+            throw new Error(fallbackMessage || 'Received malformed JSON from the server.');
+        }
+    }
+
+    if (res.ok) {
+        return raw;
+    }
+
+    throw new Error(raw.trim() || fallbackMessage || `Request failed with status ${res.status}`);
+}
+
 async function fetchProducts() {
     try {
         const res = await fetch(`${API_URL}/products`);
         if (!res.ok) throw new Error('Unable to load products');
-        return await res.json();
+        return await readJsonResponse(res, 'Unable to load products');
     } catch (err) {
         console.error('Failed to fetch products:', err);
         return [];
@@ -59,7 +83,7 @@ async function fetchProductById(id) {
     try {
         const res = await fetch(`${API_URL}/products/${id}`);
         if (!res.ok) throw new Error('Unable to load product');
-        return await res.json();
+        return await readJsonResponse(res, 'Unable to load product');
     } catch (err) {
         console.error('Failed to fetch product:', err);
         return null;
@@ -80,11 +104,12 @@ async function updateCartCount() {
         const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
-        const cart = await res.json();
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cart = await readJsonResponse(res, 'Unable to load cart count');
+        const totalItems = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
         countElement.textContent = totalItems;
     } catch (err) {
         console.error('Failed to update cart count:', err);
+        countElement.textContent = '0';
     }
 }
 
@@ -138,7 +163,7 @@ async function addToCart(productId) {
             },
             body: JSON.stringify({ product_id: productId, quantity: 1 })
         });
-        const result = await res.json();
+        const result = await readJsonResponse(res, 'Unable to add to cart');
         if (result.success) {
             updateCartCount();
             showToast('Item added to cart!');
