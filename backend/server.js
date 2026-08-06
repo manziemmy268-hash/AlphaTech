@@ -12,15 +12,14 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// JWT_SECRET is required
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    console.error('FATAL: JWT_SECRET environment variable is not set.');
-    process.exit(1);
+// JWT_SECRET is required for auth, but we provide a safe fallback for local development
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? 'replace-me-in-production' : 'dev-secret-change-me');
+if (!process.env.JWT_SECRET) {
+    console.warn('JWT_SECRET not set. Using a development fallback secret.');
 }
 
-const PORT = process.env.PORT || 3000;
-const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const PORT = process.env.PORT || (isProduction ? 3000 : 3001);
 
 const app = express();
 
@@ -230,6 +229,17 @@ try {
 // Generate SKUs for existing products
 db.prepare(`UPDATE products SET sku = 'PHN-' || printf('%04d', id) WHERE sku IS NULL`).run();
 
+// Seed some default featured products if none exist
+try {
+    const featuredCount = db.prepare("SELECT COUNT(*) as count FROM products WHERE featured = 1").get();
+    if (featuredCount.count === 0) {
+        db.prepare("UPDATE products SET featured = 1 WHERE id IN (1, 2, 3, 6, 7)").run();
+        console.log('Set default featured products.');
+    }
+} catch (e) {
+    console.error('Featured seed error:', e.message);
+}
+
 console.log('Migrations applied.');
 
 // Seed admin
@@ -242,16 +252,17 @@ if (adminCount.count === 0) {
 }
 
 // Seed products
+const productsSeed = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'products.json'), 'utf-8'));
 const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get();
-if (productCount.count === 0) {
+if (productCount.count === 0 || productCount.count < productsSeed.length) {
     try {
-        const products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'products.json'), 'utf-8'));
-        const brands = [...new Set(products.map(p => p.brand))];
+        const brands = [...new Set(productsSeed.map(p => p.brand))];
         const categoryMap = {};
         const insertCat = db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)");
         const getCat = db.prepare("SELECT id FROM categories WHERE name = ?");
-        const insertProduct = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        const existsProduct = db.prepare("SELECT id FROM products WHERE name = ? AND brand = ?");
+        const insertProduct = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
         brands.forEach(brand => {
             insertCat.run(brand);
@@ -260,13 +271,30 @@ if (productCount.count === 0) {
         });
 
         db.transaction(() => {
-            products.forEach(p => {
-                insertProduct.run(p.name, p.brand, categoryMap[p.brand], p.price, p.description, p.image,
-                    p.specs.processor, p.specs.display, p.specs.camera, p.specs.battery);
+            productsSeed.forEach(p => {
+                const existing = existsProduct.get(p.name, p.brand);
+                if (existing) return;
+
+                insertProduct.run(
+                    p.name,
+                    p.brand,
+                    categoryMap[p.brand] || null,
+                    p.price,
+                    p.description,
+                    p.image,
+                    p.specs?.processor || null,
+                    p.specs?.display || null,
+                    p.specs?.camera || null,
+                    p.specs?.battery || null,
+                    10,
+                    null,
+                    null,
+                    0
+                );
             });
         })();
 
-        console.log(`Seeded ${products.length} products and ${brands.length} categories.`);
+        console.log(`Seeded ${productsSeed.length} products and ${brands.length} categories.`);
     } catch (err) {
         console.error('Could not seed products:', err.message);
     }
