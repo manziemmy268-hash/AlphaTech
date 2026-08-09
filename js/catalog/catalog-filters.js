@@ -43,9 +43,15 @@ class CatalogFilters {
         container.addEventListener('click', (e) => {
             const clearBtn = e.target.closest('[data-clear-filters]');
             if (clearBtn) this._clearAll();
-            const toggleBtn = e.target.closest('[data-toggle-filters]');
-            if (toggleBtn) this._toggleMobile();
         });
+
+        const toggleBtn = document.querySelector('[data-toggle-filters]');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._toggleMobile();
+            });
+        }
 
         document.addEventListener('click', (e) => {
             if (this.container.classList.contains('filters-panel--open') &&

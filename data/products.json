@@ -4,6 +4,9 @@
     "name": "iPhone 15 Pro",
     "brand": "Apple",
     "price": 999,
+    "stock": 18,
+    "badge": "Best Seller",
+    "featured": 1,
     "image": "assets/images/iphone15.png",
     "description": "The iPhone 15 Pro features a strong and light titanium design with new contoured edges, a new Action button, powerful camera upgrades, and A17 Pro for next-level performance and mobile gaming.",
     "specs": {
@@ -18,6 +21,9 @@
     "name": "Samsung Galaxy S24 Ultra",
     "brand": "Samsung",
     "price": 1299,
+    "stock": 10,
+    "badge": "Top Rated",
+    "featured": 1,
     "image": "assets/images/s24.png",
     "description": "Galaxy S24 Ultra features a stunning titanium exterior, a massive battery, and the most advanced AI-powered camera system in a smartphone.",
     "specs": {
@@ -32,8 +38,11 @@
     "name": "Google Pixel 8 Pro",
     "brand": "Google",
     "price": 999,
+    "stock": 14,
+    "badge": null,
+    "featured": 0,
     "image": "assets/images/pixel8.png",
-    "description": "Pixel 8 Pro is the all-pro phone engineered by Google. It’s sleek, sophisticated, and has a powerful triple camera system.",
+    "description": "Pixel 8 Pro is the all-pro phone engineered by Google. It's sleek, sophisticated, and has a powerful triple camera system.",
     "specs": {
       "display": "6.7-inch Super Actua display",
       "processor": "Google Tensor G3",
@@ -46,6 +55,9 @@
     "name": "OnePlus 12",
     "brand": "OnePlus",
     "price": 799,
+    "stock": 20,
+    "badge": null,
+    "featured": 0,
     "image": "assets/images/oneplus12.png",
     "description": "The OnePlus 12 features the latest Snapdragon 8 Gen 3, a brilliant 2K 120Hz ProXDR display, and 4th Gen Hasselblad Camera for Mobile.",
     "specs": {
@@ -60,6 +72,9 @@
     "name": "Xiaomi 14 Ultra",
     "brand": "Xiaomi",
     "price": 1199,
+    "stock": 8,
+    "badge": "Premium",
+    "featured": 0,
     "image": "assets/images/xiaomi14.png",
     "description": "Xiaomi 14 Ultra features a Leica Summilux optical lens and a 1-inch main camera for professional-grade photography.",
     "specs": {
@@ -74,6 +89,9 @@
     "name": "Samsung Galaxy S25 Ultra",
     "brand": "Samsung",
     "price": 1399,
+    "stock": 12,
+    "badge": "New",
+    "featured": 1,
     "image": "assets/images/s25ultra.svg",
     "description": "Galaxy S25 Ultra pushes premium Android performance further with sharper AI tools, an enhanced zoom system, and all-day battery confidence.",
     "specs": {
@@ -88,6 +106,9 @@
     "name": "iPhone 16 Pro",
     "brand": "Apple",
     "price": 1099,
+    "stock": 15,
+    "badge": "New",
+    "featured": 1,
     "image": "assets/images/iphone16pro.svg",
     "description": "iPhone 16 Pro refines Apple's best-selling formula with a brighter display, stronger efficiency, and a more capable camera system.",
     "specs": {
@@ -102,6 +123,9 @@
     "name": "Google Pixel 9 Pro",
     "brand": "Google",
     "price": 1049,
+    "stock": 11,
+    "badge": "New",
+    "featured": 1,
     "image": "assets/images/pixel9pro.svg",
     "description": "Pixel 9 Pro delivers clean software, smarter AI features, and excellent photography in a polished flagship design.",
     "specs": {
@@ -116,6 +140,9 @@
     "name": "OnePlus 13",
     "brand": "OnePlus",
     "price": 899,
+    "stock": 22,
+    "badge": null,
+    "featured": 0,
     "image": "assets/images/oneplus13.svg",
     "description": "OnePlus 13 balances speed, fluidity, and fast charging with a premium finish and responsive 120Hz display.",
     "specs": {
@@ -130,6 +157,9 @@
     "name": "Xiaomi 15 Ultra",
     "brand": "Xiaomi",
     "price": 1299,
+    "stock": 6,
+    "badge": "Premium",
+    "featured": 1,
     "image": "assets/images/xiaomi15ultra.svg",
     "description": "Xiaomi 15 Ultra is built for camera-first buyers who want pro-grade zoom, fast performance, and a luxurious finish.",
     "specs": {
@@ -137,6 +167,448 @@
       "processor": "Snapdragon 8 Elite",
       "camera": "50MP Main | 50MP Telephoto | 50MP Periscope | 50MP Ultra Wide",
       "battery": "5200mAh with 120W charging"
+    }
+  },
+  {
+    "id": 11,
+    "name": "iPhone 15",
+    "brand": "Apple",
+    "price": 799,
+    "stock": 30,
+    "badge": "Value Pick",
+    "featured": 0,
+    "image": "assets/images/iphone15.png",
+    "description": "iPhone 15 brings Dynamic Island, a 48MP camera, USB-C charging, and the powerful A16 Bionic chip into an elegant aluminium design.",
+    "specs": {
+      "display": "6.1-inch Super Retina XDR",
+      "processor": "A16 Bionic chip",
+      "camera": "48MP Main | 12MP Ultra Wide",
+      "battery": "Up to 20 hours video playback"
+    }
+  },
+  {
+    "id": 12,
+    "name": "Samsung Galaxy A55",
+    "brand": "Samsung",
+    "price": 449,
+    "stock": 35,
+    "badge": "Budget Flagship",
+    "featured": 0,
+    "image": "assets/images/s24.png",
+    "description": "Galaxy A55 brings flagship-level design and a vivid 120Hz display to the mid-range segment with a powerful OIS triple camera.",
+    "specs": {
+      "display": "6.6-inch Super AMOLED",
+      "processor": "Exynos 1480",
+      "camera": "50MP Main | 12MP Ultra Wide | 5MP Macro",
+      "battery": "5000mAh with 25W charging"
+    }
+  },
+  {
+    "id": 13,
+    "name": "Google Pixel 8a",
+    "brand": "Google",
+    "price": 499,
+    "stock": 25,
+    "badge": "Value Pick",
+    "featured": 0,
+    "image": "assets/images/pixel8.png",
+    "description": "Pixel 8a brings Google's best AI features, a bright display, and excellent cameras to a budget-friendly form factor.",
+    "specs": {
+      "display": "6.1-inch OLED 120Hz",
+      "processor": "Google Tensor G3",
+      "camera": "64MP Main | 13MP Ultra Wide",
+      "battery": "4492mAh with 18W charging"
+    }
+  },
+  {
+    "id": 14,
+    "name": "Xiaomi Redmi Note 13 Pro",
+    "brand": "Xiaomi",
+    "price": 349,
+    "stock": 40,
+    "badge": "Best Value",
+    "featured": 0,
+    "image": "assets/images/xiaomi14.png",
+    "description": "Redmi Note 13 Pro delivers 200MP photography, a 120Hz AMOLED display, and 67W fast charging at a price that defies expectations.",
+    "specs": {
+      "display": "6.67-inch AMOLED 120Hz",
+      "processor": "Snapdragon 7s Gen 2",
+      "camera": "200MP Main | 8MP Ultra Wide | 2MP Macro",
+      "battery": "5100mAh with 67W charging"
+    }
+  },
+  {
+    "id": 15,
+    "name": "Nokia G60 5G",
+    "brand": "Nokia",
+    "price": 299,
+    "stock": 28,
+    "badge": null,
+    "featured": 0,
+    "image": "assets/images/nokia.png",
+    "description": "Nokia G60 5G offers a clean Android experience with 3 years of OS upgrades, reliable 5G connectivity and a sturdy eco-conscious build.",
+    "specs": {
+      "display": "6.58-inch IPS LCD 120Hz",
+      "processor": "Snapdragon 695 5G",
+      "camera": "50MP Main | 5MP Ultra Wide | 2MP Depth",
+      "battery": "4500mAh with 20W charging"
+    }
+  },
+  {
+    "id": 16,
+    "name": "Nokia X30 5G",
+    "brand": "Nokia",
+    "price": 499,
+    "stock": 16,
+    "badge": null,
+    "featured": 0,
+    "image": "assets/images/nokia.png",
+    "description": "Nokia X30 5G comes with a premium recycled aluminium frame, a 50MP selfie camera and guaranteed updates for 3 years.",
+    "specs": {
+      "display": "6.43-inch pOLED 90Hz",
+      "processor": "Snapdragon 695 5G",
+      "camera": "50MP Main | 13MP Ultra Wide",
+      "battery": "4200mAh with 33W charging"
+    }
+  },
+  {
+    "id": 17,
+    "name": "Tecno Phantom X2 Pro",
+    "brand": "Tecno",
+    "price": 599,
+    "stock": 12,
+    "badge": "New",
+    "featured": 1,
+    "image": "assets/images/tecno.png",
+    "description": "Tecno Phantom X2 Pro surprises with a retractable portrait lens, a strikingly designed glass back, and powerful performance for creators.",
+    "specs": {
+      "display": "6.8-inch AMOLED 120Hz",
+      "processor": "Dimensity 9000",
+      "camera": "50MP Main | 50MP Retractable Portrait | 13MP Ultra Wide",
+      "battery": "5160mAh with 45W charging"
+    }
+  },
+  {
+    "id": 18,
+    "name": "Tecno Spark 20 Pro+",
+    "brand": "Tecno",
+    "price": 199,
+    "stock": 50,
+    "badge": "Budget",
+    "featured": 0,
+    "image": "assets/images/tecno.png",
+    "description": "Tecno Spark 20 Pro+ offers a large display, a 50MP selfie camera, and a long-lasting 5000mAh battery for everyday users on a budget.",
+    "specs": {
+      "display": "6.78-inch IPS LCD 120Hz",
+      "processor": "Helio G88",
+      "camera": "108MP Main | 50MP Selfie",
+      "battery": "5000mAh with 18W charging"
+    }
+  },
+  {
+    "id": 19,
+    "name": "Samsung Galaxy Z Fold 6",
+    "brand": "Samsung",
+    "price": 1899,
+    "stock": 5,
+    "badge": "Exclusive",
+    "featured": 1,
+    "image": "assets/images/s25ultra.svg",
+    "description": "Galaxy Z Fold 6 redefines productivity with a tablet-like foldable display, enhanced multitasking, and a refined hinge design.",
+    "specs": {
+      "display": "7.6-inch QXGA+ AMOLED | 6.3-inch Cover",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "50MP Main | 10MP Telephoto | 12MP Ultra Wide",
+      "battery": "4400mAh with 25W charging"
+    }
+  },
+  {
+    "id": 20,
+    "name": "Samsung Galaxy Z Flip 6",
+    "brand": "Samsung",
+    "price": 1099,
+    "stock": 9,
+    "badge": "Exclusive",
+    "featured": 0,
+    "image": "assets/images/s24.png",
+    "description": "Galaxy Z Flip 6 brings a bigger battery, AI-powered camera improvements, and fashionable foldable design to a compact flip phone.",
+    "specs": {
+      "display": "6.7-inch FHD+ AMOLED | 3.4-inch Cover",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "50MP Main | 12MP Ultra Wide",
+      "battery": "4000mAh with 25W charging"
+    }
+  },
+  {
+    "id": 21,
+    "name": "Apple iPhone SE 3rd Gen",
+    "brand": "Apple",
+    "price": 429,
+    "stock": 45,
+    "badge": "Compact",
+    "featured": 0,
+    "image": "assets/images/iphone15.png",
+    "description": "iPhone SE offers the power of A15 Bionic in Apple's most affordable iPhone, perfect for those who prefer a compact size and Home button.",
+    "specs": {
+      "display": "4.7-inch Retina HD",
+      "processor": "A15 Bionic chip",
+      "camera": "12MP Wide with Smart HDR 4",
+      "battery": "Up to 15 hours video playback"
+    }
+  },
+  {
+    "id": 22,
+    "name": "iPhone 16 Pro Max",
+    "brand": "Apple",
+    "price": 1199,
+    "stock": 10,
+    "badge": "Flagship",
+    "featured": 1,
+    "image": "assets/images/iphone16pro.svg",
+    "description": "iPhone 16 Pro Max pushes the limits of performance and camera excellence with the A18 Pro chip and the largest Super Retina XDR display ever.",
+    "specs": {
+      "display": "6.9-inch Super Retina XDR",
+      "processor": "A18 Pro chip",
+      "camera": "48MP Fusion | 12MP Ultra Wide | 5x Telephoto",
+      "battery": "Up to 33 hours video playback"
+    }
+  },
+  {
+    "id": 23,
+    "name": "Sony Xperia 1 VI",
+    "brand": "Sony",
+    "price": 1299,
+    "stock": 7,
+    "badge": "Creator's Choice",
+    "featured": 0,
+    "image": "assets/images/sony.png",
+    "description": "Sony Xperia 1 VI is made for creators who want cinematic video, alpha-class photography, and a premium Hi-Res audio experience.",
+    "specs": {
+      "display": "6.5-inch OLED 4K 120Hz",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "52MP Main | 12MP Ultra Wide | 12MP Telephoto",
+      "battery": "5000mAh with 30W charging"
+    }
+  },
+  {
+    "id": 24,
+    "name": "Sony Xperia 5 VI",
+    "brand": "Sony",
+    "price": 999,
+    "stock": 9,
+    "badge": null,
+    "featured": 0,
+    "image": "assets/images/sony.png",
+    "description": "Sony Xperia 5 VI combines a slim compact body with flagship-grade camera optics, a bright OLED display, and a 3.5mm headphone jack.",
+    "specs": {
+      "display": "6.1-inch OLED 120Hz",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "48MP Main | 12MP Ultra Wide | 12MP Telephoto",
+      "battery": "5000mAh with 30W charging"
+    }
+  },
+  {
+    "id": 25,
+    "name": "Motorola Edge 50 Pro",
+    "brand": "Motorola",
+    "price": 549,
+    "stock": 19,
+    "badge": "Mid-Range King",
+    "featured": 0,
+    "image": "assets/images/motorola.png",
+    "description": "Motorola Edge 50 Pro packs a stunning OLED display, 125W turbo charging, and smart AI features into a mid-range package.",
+    "specs": {
+      "display": "6.7-inch pOLED 144Hz",
+      "processor": "Snapdragon 7 Gen 3",
+      "camera": "50MP OIS Main | 13MP Ultra Wide | 10MP Telephoto",
+      "battery": "4500mAh with 125W turbo charging"
+    }
+  },
+  {
+    "id": 26,
+    "name": "Motorola Razr 50 Ultra",
+    "brand": "Motorola",
+    "price": 999,
+    "stock": 8,
+    "badge": "Foldable",
+    "featured": 0,
+    "image": "assets/images/motorola.png",
+    "description": "Motorola Razr 50 Ultra is a fashion-forward flip phone with the largest external display in its class and AI-powered features.",
+    "specs": {
+      "display": "6.9-inch pOLED 165Hz | 4-inch Cover",
+      "processor": "Snapdragon 8s Gen 3",
+      "camera": "50MP OIS Main | 50MP Ultra Wide",
+      "battery": "3600mAh with 45W charging"
+    }
+  },
+  {
+    "id": 27,
+    "name": "OnePlus Nord CE 4",
+    "brand": "OnePlus",
+    "price": 349,
+    "stock": 32,
+    "badge": "Value Pick",
+    "featured": 0,
+    "image": "assets/images/oneplus12.png",
+    "description": "OnePlus Nord CE 4 delivers flagship-grade performance with Snapdragon 7s Gen 3, AMOLED 120Hz display, and 100W SUPERVOOC charging.",
+    "specs": {
+      "display": "6.7-inch AMOLED 120Hz",
+      "processor": "Snapdragon 7s Gen 3",
+      "camera": "50MP OIS Main | 8MP Ultra Wide",
+      "battery": "5500mAh with 100W SUPERVOOC"
+    }
+  },
+  {
+    "id": 28,
+    "name": "Honor Magic 6 Pro",
+    "brand": "Honor",
+    "price": 999,
+    "stock": 11,
+    "badge": "AI Camera",
+    "featured": 0,
+    "image": "assets/images/honor.png",
+    "description": "Honor Magic 6 Pro dazzles with a 180MP periscope telephoto camera, a striking curved display, and a powerful Snapdragon 8 Gen 3 chip.",
+    "specs": {
+      "display": "6.8-inch LTPO AMOLED 120Hz",
+      "processor": "Snapdragon 8 Gen 3",
+      "camera": "50MP Main | 180MP Periscope Telephoto | 12MP Ultra Wide",
+      "battery": "5600mAh with 80W charging"
+    }
+  },
+  {
+    "id": 29,
+    "name": "Honor X9b",
+    "brand": "Honor",
+    "price": 299,
+    "stock": 26,
+    "badge": "Durable",
+    "featured": 0,
+    "image": "assets/images/honor.png",
+    "description": "Honor X9b comes with military-grade durability, a large 108MP camera, and a massive 5800mAh battery — built to last all day and more.",
+    "specs": {
+      "display": "6.78-inch AMOLED 90Hz",
+      "processor": "Snapdragon 6 Gen 1",
+      "camera": "108MP Main | 5MP Ultra Wide | 2MP Depth",
+      "battery": "5800mAh with 35W charging"
+    }
+  },
+  {
+    "id": 30,
+    "name": "Xiaomi Poco F6 Pro",
+    "brand": "Xiaomi",
+    "price": 599,
+    "stock": 20,
+    "badge": "Performance Beast",
+    "featured": 0,
+    "image": "assets/images/xiaomi14.png",
+    "description": "Poco F6 Pro brings Snapdragon 8 Gen 2, a 2K 144Hz display, and a 50MP Sony OIS main camera in an aggressively priced flagship killer.",
+    "specs": {
+      "display": "6.67-inch 2K AMOLED 144Hz",
+      "processor": "Snapdragon 8 Gen 2",
+      "camera": "50MP Sony OIS Main | 8MP Ultra Wide | 2MP Macro",
+      "battery": "5000mAh with 67W charging"
+    }
+  },
+  {
+    "id": 31,
+    "name": "Samsung Galaxy A35",
+    "brand": "Samsung",
+    "price": 349,
+    "stock": 38,
+    "badge": "Popular",
+    "featured": 0,
+    "image": "assets/images/s24.png",
+    "description": "Galaxy A35 offers a near-flagship look with an AMOLED display, 50MP main camera, and Samsung's trusted ecosystem at a mid-range price.",
+    "specs": {
+      "display": "6.6-inch Super AMOLED 120Hz",
+      "processor": "Exynos 1380",
+      "camera": "50MP Main | 8MP Ultra Wide | 5MP Macro",
+      "battery": "5000mAh with 25W charging"
+    }
+  },
+  {
+    "id": 32,
+    "name": "Nokia G42 5G",
+    "brand": "Nokia",
+    "price": 229,
+    "stock": 24,
+    "badge": "Eco-Friendly",
+    "featured": 0,
+    "image": "assets/images/nokia.png",
+    "description": "Nokia G42 5G is a repairable, sustainable smartphone with iFixit support, 5G connectivity, and a clean Android experience.",
+    "specs": {
+      "display": "6.56-inch IPS LCD 90Hz",
+      "processor": "Snapdragon 480+ 5G",
+      "camera": "50MP Main | 2MP Depth | 2MP Macro",
+      "battery": "4500mAh with 20W charging"
+    }
+  },
+  {
+    "id": 33,
+    "name": "Tecno Camon 20 Premier",
+    "brand": "Tecno",
+    "price": 399,
+    "stock": 17,
+    "badge": "Camera Star",
+    "featured": 0,
+    "image": "assets/images/tecno.png",
+    "description": "Tecno Camon 20 Premier wows with a 50MP OIS periscope zoom camera, Segmented RGBW sensor, and a curved AMOLED display.",
+    "specs": {
+      "display": "6.67-inch Curved AMOLED 120Hz",
+      "processor": "Dimensity 8050",
+      "camera": "50MP OIS Main | 50MP Periscope | 8MP Wide",
+      "battery": "5000mAh with 45W charging"
+    }
+  },
+  {
+    "id": 34,
+    "name": "Motorola Moto G85 5G",
+    "brand": "Motorola",
+    "price": 259,
+    "stock": 33,
+    "badge": "Best Budget 5G",
+    "featured": 0,
+    "image": "assets/images/motorola.png",
+    "description": "Moto G85 5G packs a vegan leather back, a crisp pOLED display, and Snapdragon 6s Gen 3 at a price that's hard to beat.",
+    "specs": {
+      "display": "6.67-inch pOLED 120Hz",
+      "processor": "Snapdragon 6s Gen 3",
+      "camera": "50MP OIS Main | 8MP Ultra Wide",
+      "battery": "5000mAh with 33W charging"
+    }
+  },
+  {
+    "id": 35,
+    "name": "Honor 200 Pro",
+    "brand": "Honor",
+    "price": 699,
+    "stock": 13,
+    "badge": "Portrait Master",
+    "featured": 0,
+    "image": "assets/images/honor.png",
+    "description": "Honor 200 Pro is a portrait photography powerhouse co-engineered with Harcourt Paris, featuring a 50MP triple camera and smooth 120Hz OLED.",
+    "specs": {
+      "display": "6.78-inch LTPS OLED 120Hz",
+      "processor": "Snapdragon 8s Gen 3",
+      "camera": "50MP OIS Main | 50MP Periscope Telephoto | 12MP Ultra Wide",
+      "battery": "5200mAh with 100W charging"
+    }
+  },
+  {
+    "id": 36,
+    "name": "Sony Xperia 10 VI",
+    "brand": "Sony",
+    "price": 599,
+    "stock": 10,
+    "badge": null,
+    "featured": 0,
+    "image": "assets/images/sony.png",
+    "description": "Sony Xperia 10 VI is a slim, lightweight mid-ranger with all-day battery life, a bright OLED screen, and Sony's signature audio DNA.",
+    "specs": {
+      "display": "6.1-inch OLED 60Hz",
+      "processor": "Snapdragon 6 Gen 1",
+      "camera": "48MP Main | 8MP Wide | 8MP Telephoto",
+      "battery": "5000mAh with 30W charging"
     }
   }
 ]

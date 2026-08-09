@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9F6FF" />
+      <stop offset="1" stop-color="#EFF0FA" />
+    </linearGradient>
+    <linearGradient id="accent" x1="250" y1="140" x2="550" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5722" />
+      <stop offset="1" stop-color="#3F51B5" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="40" fill="url(#bg)" />
+  <!-- Phone shell -->
+  <rect x="290" y="100" width="220" height="400" rx="30" fill="#3F51B5" />
+  <rect x="294" y="104" width="212" height="392" rx="26" fill="#FFFFFF" stroke="url(#accent)" stroke-width="4" />
+  <!-- Screen area -->
+  <rect x="304" y="118" width="192" height="364" rx="20" fill="#0A0B14" />
+  <!-- Dynamic modern shapes on screen -->
+  <circle cx="370" cy="280" r="30" fill="#FF5722" opacity="0.4" />
+  <circle cx="430" cy="330" r="45" fill="#3F51B5" opacity="0.3" />
+  <!-- Brand text -->
+  <text x="400" y="540" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="bold" font-size="26" fill="#3F51B5" letter-spacing="6">TECNO</text>
+</svg>

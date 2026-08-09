@@ -226,6 +226,41 @@ try {
     `);
 } catch (e) { console.error('Migration error:', e.message); }
 
+// Ensure cart_items has a UNIQUE(user_id, product_id) constraint so the
+// upsert works. SQLite auto-creates the index sqlite_autoindex_cart_items_1
+// when the constraint exists; if it's missing we rebuild the table.
+try {
+    const autoIndex = db.prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'cart_items' AND name LIKE 'sqlite_autoindex_cart_items_%'"
+    ).get();
+    if (!autoIndex) {
+        db.exec(`
+            PRAGMA foreign_keys = OFF;
+            BEGIN;
+            CREATE TABLE cart_items_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity INTEGER DEFAULT 1,
+                added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+                UNIQUE(user_id, product_id)
+            );
+            INSERT INTO cart_items_new (id, user_id, product_id, quantity, added_at)
+                SELECT id, user_id, product_id, quantity, added_at FROM cart_items;
+            DROP TABLE cart_items;
+            ALTER TABLE cart_items_new RENAME TO cart_items;
+            COMMIT;
+            PRAGMA foreign_keys = ON;
+        `);
+        console.log('Migration: rebuilt cart_items with UNIQUE(user_id, product_id).');
+    }
+} catch (e) {
+    console.error('Cart migration error:', e.message);
+    try { db.exec("ROLLBACK; PRAGMA foreign_keys = ON;"); } catch (_) {}
+}
+
 // Generate SKUs for existing products
 db.prepare(`UPDATE products SET sku = 'PHN-' || printf('%04d', id) WHERE sku IS NULL`).run();
 
@@ -253,8 +288,8 @@ if (adminCount.count === 0) {
 
 // Seed products
 const productsSeed = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'products.json'), 'utf-8'));
-const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get();
-if (productCount.count === 0 || productCount.count < productsSeed.length) {
+// Synchronize products on startup to apply updates from JSON
+{
     try {
         const brands = [...new Set(productsSeed.map(p => p.brand))];
         const categoryMap = {};
@@ -263,6 +298,7 @@ if (productCount.count === 0 || productCount.count < productsSeed.length) {
         const existsProduct = db.prepare("SELECT id FROM products WHERE name = ? AND brand = ?");
         const insertProduct = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        const updateProduct = db.prepare(`UPDATE products SET price=?, stock=?, badge=?, featured=?, image=? WHERE name=? AND brand=?`);
 
         brands.forEach(brand => {
             insertCat.run(brand);
@@ -270,11 +306,15 @@ if (productCount.count === 0 || productCount.count < productsSeed.length) {
             if (cat) categoryMap[brand] = cat.id;
         });
 
+        let inserted = 0, updated = 0;
         db.transaction(() => {
             productsSeed.forEach(p => {
                 const existing = existsProduct.get(p.name, p.brand);
-                if (existing) return;
-
+                if (existing) {
+                    updateProduct.run(p.price, p.stock ?? 10, p.badge || null, p.featured ? 1 : 0, p.image, p.name, p.brand);
+                    updated++;
+                    return;
+                }
                 insertProduct.run(
                     p.name,
                     p.brand,
@@ -286,15 +326,16 @@ if (productCount.count === 0 || productCount.count < productsSeed.length) {
                     p.specs?.display || null,
                     p.specs?.camera || null,
                     p.specs?.battery || null,
-                    10,
+                    p.stock ?? 10,
                     null,
-                    null,
-                    0
+                    p.badge || null,
+                    p.featured ? 1 : 0
                 );
+                inserted++;
             });
         })();
 
-        console.log(`Seeded ${productsSeed.length} products and ${brands.length} categories.`);
+        console.log(`Products: ${inserted} inserted, ${updated} updated. Brands: ${brands.length}.`);
     } catch (err) {
         console.error('Could not seed products:', err.message);
     }
@@ -331,7 +372,7 @@ function validatePassword(password) {
     return null;
 }
 
-const canonBrands = { apple: 'Apple', samsung: 'Samsung', google: 'Google', oneplus: 'OnePlus', xiaomi: 'Xiaomi', nokia: 'Nokia', tecno: 'Tecno' };
+const canonBrands = { apple: 'Apple', samsung: 'Samsung', google: 'Google', oneplus: 'OnePlus', xiaomi: 'Xiaomi', nokia: 'Nokia', tecno: 'Tecno', sony: 'Sony', motorola: 'Motorola', honor: 'Honor' };
 
 function normalizeName(v) { return typeof v === 'string' ? v.trim().replace(/\s+/g, ' ') : v; }
 function normalizeBrand(v) {
@@ -691,26 +732,66 @@ app.post('/api/cart', authenticateToken, (req, res) => {
     if (!product_id || !Number.isInteger(Number(product_id))) {
         return res.status(400).json({ success: false, message: 'Invalid product ID.' });
     }
-    db.prepare(`INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)
-        ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = quantity + ?`)
-        .run(req.user.id, product_id, Math.max(1, Math.min(99, Number(quantity) || 1)), Math.max(1, Math.min(99, Number(quantity) || 1)));
-    res.json({ success: true, message: 'Added to cart!' });
+
+    const qty = Math.max(1, Math.min(99, Number(quantity) || 1));
+
+    try {
+        const product = db.prepare("SELECT id, stock FROM products WHERE id = ?").get(product_id);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found.' });
+        }
+        if (product.stock <= 0) {
+            return res.status(400).json({ success: false, message: 'This product is out of stock.' });
+        }
+
+        db.transaction(() => {
+            const existing = db.prepare("SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?")
+                .get(req.user.id, product_id);
+            if (existing) {
+                db.prepare("UPDATE cart_items SET quantity = MIN(99, quantity + ?) WHERE id = ?")
+                    .run(qty, existing.id);
+            } else {
+                db.prepare("INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)")
+                    .run(req.user.id, product_id, qty);
+            }
+        })();
+
+        res.json({ success: true, message: 'Added to cart!' });
+    } catch (err) {
+        console.error('Error adding to cart:', err);
+        res.status(500).json({ success: false, message: 'Failed to add item to cart.' });
+    }
 });
 
 app.put('/api/cart/:id', authenticateToken, (req, res) => {
-    db.prepare("UPDATE cart_items SET quantity = ? WHERE id = ? AND user_id = ?")
-        .run(Math.max(1, Math.min(99, Number(req.body.quantity) || 1)), req.params.id, req.user.id);
-    res.json({ success: true, message: 'Cart updated.' });
+    try {
+        db.prepare("UPDATE cart_items SET quantity = ? WHERE id = ? AND user_id = ?")
+            .run(Math.max(1, Math.min(99, Number(req.body.quantity) || 1)), req.params.id, req.user.id);
+        res.json({ success: true, message: 'Cart updated.' });
+    } catch (err) {
+        console.error('Error updating cart:', err);
+        res.status(500).json({ success: false, message: 'Failed to update cart.' });
+    }
 });
 
 app.delete('/api/cart/:id', authenticateToken, (req, res) => {
-    db.prepare("DELETE FROM cart_items WHERE id = ? AND user_id = ?").run(req.params.id, req.user.id);
-    res.json({ success: true, message: 'Removed from cart.' });
+    try {
+        db.prepare("DELETE FROM cart_items WHERE id = ? AND user_id = ?").run(req.params.id, req.user.id);
+        res.json({ success: true, message: 'Removed from cart.' });
+    } catch (err) {
+        console.error('Error removing cart item:', err);
+        res.status(500).json({ success: false, message: 'Failed to remove cart item.' });
+    }
 });
 
 app.delete('/api/cart', authenticateToken, (req, res) => {
-    db.prepare("DELETE FROM cart_items WHERE user_id = ?").run(req.user.id);
-    res.json({ success: true, message: 'Cart cleared.' });
+    try {
+        db.prepare("DELETE FROM cart_items WHERE user_id = ?").run(req.user.id);
+        res.json({ success: true, message: 'Cart cleared.' });
+    } catch (err) {
+        console.error('Error clearing cart:', err);
+        res.status(500).json({ success: false, message: 'Failed to clear cart.' });
+    }
 });
 
 // ============================================
@@ -876,6 +957,24 @@ app.get('/api/admin/low-stock', authenticateToken, requireAdmin, (req, res) => {
 
 app.get('/api/admin/users', authenticateToken, requireAdmin, (req, res) => {
     res.json(db.prepare("SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC").all());
+});
+
+// ============================================
+// ERROR HANDLER
+// ============================================
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    if (res.headersSent) return next(err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: 'Internal server error.',
+        error: process.env.NODE_ENV === 'production' ? undefined : err.message,
+    });
+});
+
+// 404 handler for unknown /api routes
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found.' });
 });
 
 // ============================================

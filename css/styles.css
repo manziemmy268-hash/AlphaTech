@@ -810,10 +810,32 @@ footer {
         grid-template-columns: 1fr;
     }
     .filters {
-        display: none;
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 300px;
+        height: 100vh;
+        z-index: 2000;
+        background: var(--surface-color);
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.15);
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: block !important;
+        overflow-y: auto;
+        padding: 3rem 1.5rem 2rem;
+        border-radius: 0 24px 24px 0;
+        border-right: 1px solid var(--border-color);
+    }
+    @media (prefers-color-scheme: dark) {
+        .filters {
+            background: #121212;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
+        }
     }
     .filters.filters-panel--open {
-        display: block;
+        left: 0 !important;
+    }
+    .filter-toggle-btn {
+        display: flex !important;
     }
 }
 
@@ -883,12 +905,6 @@ footer {
     }
     .product-image {
         height: 180px;
-    }
-    .filter-toggle-btn {
-        display: flex;
-    }
-    .filters.active {
-        display: block;
     }
 }
 

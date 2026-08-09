@@ -3,6 +3,7 @@ database.sqlite
 database.sqlite-shm
 database.sqlite-wal
 backend/database.sqlite
+backend/phonne.db
 backend/cd
 .env
 .DS_Store
