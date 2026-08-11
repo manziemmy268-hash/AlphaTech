@@ -202,10 +202,10 @@
             tbody.innerHTML = users.map(user => `
                 <tr>
                     <td>#${user.id}</td>
-                    <td><span style="font-weight: 500;">${user.username}</span></td>
-                    <td>${user.phone || '<span style="color:var(--secondary-color); font-style:italic;">No Phone</span>'}</td>
-                    <td>${user.email}</td>
-                    <td><span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${user.role.toUpperCase()}</span></td>
+                    <td><span style="font-weight: 500;">${escapeHtml(user.username)}</span></td>
+                    <td>${escapeHtml(user.phone) || '<span style="color:var(--secondary-color); font-style:italic;">No Phone</span>'}</td>
+                    <td>${escapeHtml(user.email)}</td>
+                    <td><span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${escapeHtml(user.role).toUpperCase()}</span></td>
                     <td>${new Date(user.created_at).toLocaleDateString()}</td>
                     <td>
                         <div style="display: flex; gap: 0.5rem;">

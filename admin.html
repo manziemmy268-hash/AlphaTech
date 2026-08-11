@@ -456,7 +456,7 @@
         async function deleteProduct(id) {
             if (confirm('Are you sure you want to delete this product?')) {
                 try {
-                    const res = await fetch(`/api/products/${id}`, {
+                    const res = await fetch(`${API_URL}/products/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
                     });

@@ -365,6 +365,15 @@ function requireAdmin(req, res, next) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function sanitizeText(value, maxLength = 2000) {
+    if (typeof value !== 'string') return '';
+    return value
+        .replace(/<[^>]*>/g, '')
+        .replace(/[<>]/g, '')
+        .trim()
+        .slice(0, maxLength);
+}
+
 function validatePassword(password) {
     if (!password || password.length < 8) return 'Password must be at least 8 characters.';
     if (!/[a-zA-Z]/.test(password)) return 'Password must contain at least one letter.';
@@ -932,7 +941,7 @@ app.post('/api/reviews', authenticateToken, (req, res) => {
     }
 
     db.prepare("INSERT INTO reviews (user_id, product_id, rating, comment) VALUES (?, ?, ?, ?)")
-        .run(req.user.id, product_id, r, comment || null);
+        .run(req.user.id, product_id, r, sanitizeText(comment) || null);
     res.json({ success: true, message: 'Thank you for your review!' });
 });
 

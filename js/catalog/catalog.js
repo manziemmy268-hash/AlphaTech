@@ -15,7 +15,7 @@
     };
 
     window.detailHandleAddToCart = function (productId) {
-        handleAddToCart(productId);
+        handleAddToCart(productId, currentQty);
     };
 
     window.switchGalleryImage = function (thumb, src) {
@@ -98,6 +98,19 @@
                 }
             }).catch(function (err) {
                 console.error('Featured load error:', err);
+            });
+        }
+
+        const trendingGrid = document.getElementById('trending-products-grid');
+        if (trendingGrid) {
+            CatalogAPI.getTrending().then(function (data) {
+                const products = data?.products || data || [];
+                if (products.length) {
+                    trendingGrid.innerHTML = products.map(p => CatalogUI.card(p, { lazy: true })).join('');
+                    if (typeof setupScrollAnimations === 'function') setupScrollAnimations();
+                }
+            }).catch(function (err) {
+                console.error('Trending load error:', err);
             });
         }
     });

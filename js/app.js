@@ -152,12 +152,14 @@ function handleProductImageError(img) {
 }
 
 // Cart management shared functions
-async function addToCart(productId) {
+async function addToCart(productId, quantity) {
     if (!Auth.isLoggedIn()) {
         showToast('Please login to add items to cart.');
         setTimeout(() => window.location.href = 'login.html', 1500);
         return;
     }
+
+    const qty = Math.max(1, Math.min(99, Number(quantity) || 1));
 
     try {
         const res = await fetch(`${API_URL}/cart`, {
@@ -166,7 +168,7 @@ async function addToCart(productId) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${Auth.getToken()}`
             },
-            body: JSON.stringify({ product_id: productId, quantity: 1 })
+            body: JSON.stringify({ product_id: productId, quantity: qty })
         });
         if (res.status === 401 || res.status === 403) {
             Auth.handleAuthFailure('Session expired. Please log in again.');
@@ -374,4 +376,14 @@ function renderStars(rating) {
         }
     }
     return starsHtml;
+}
+
+// Escape user-generated text before inserting into the DOM
+function escapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

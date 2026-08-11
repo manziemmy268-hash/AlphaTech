@@ -50,7 +50,7 @@ class CatalogDetail {
         const p = this.product;
         const imgSrc = getProductImageSrc(p.image);
 
-        const gallery = (p.gallery || []).length > 0 ? p.gallery : [{ image_url: p.image }];
+        const gallery = (p.gallery || []).length > 0 ? p.gallery : [{ url: p.image }];
 
         const variants = (p.variants || []).map(v =>
             `<span class="variant-chip" style="display:inline-block;padding:0.3rem 0.8rem;border:1px solid var(--secondary-color);border-radius:6px;margin:0.2rem;font-size:0.85rem" title="${v.value}">${v.name}: ${v.value}${v.stock !== undefined ? ` (${v.stock})` : ''}</span>`
@@ -71,10 +71,10 @@ class CatalogDetail {
                     </div>
                     <div class="gallery-thumbs" style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.5rem">
                         ${gallery.map((g, i) => `
-                            <img src="${getProductImageSrc(g.image_url)}" alt="${p.name} ${i + 1}"
+                            <img src="${getProductImageSrc(g.url)}" alt="${p.name} ${i + 1}"
                                 class="gallery-thumb${i === 0 ? ' active' : ''}"
                                 style="width:72px;height:72px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i === 0 ? 'var(--primary-color)' : 'transparent'};flex-shrink:0"
-                                onclick="switchGalleryImage(this, '${getProductImageSrc(g.image_url).replace(/'/g, "\\'")}')"
+                                onclick="switchGalleryImage(this, '${getProductImageSrc(g.url).replace(/'/g, "\\'")}')"
                                 loading="lazy">
                         `).join('')}
                     </div>
