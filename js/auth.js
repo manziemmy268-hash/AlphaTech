@@ -68,6 +68,22 @@ const Auth = {
         window.location.href = 'index.html';
     },
 
+    // Clear session without redirecting (used on auth failures)
+    clearSession: function() {
+        localStorage.removeItem('phonne_currentUser');
+        localStorage.removeItem('phonne_jwt_token');
+    },
+
+    // Handle an expired/invalid token response: clear session and send to login
+    handleAuthFailure: function(message) {
+        const hadSession = this.isLoggedIn();
+        this.clearSession();
+        if (hadSession) {
+            showToast && showToast(message || 'Session expired. Please log in again.');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        }
+    },
+
     // Check if user is logged in
     isLoggedIn: function() {
         return this.getToken() !== null && this.getCurrentUser() !== null;

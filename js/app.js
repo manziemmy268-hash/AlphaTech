@@ -104,6 +104,11 @@ async function updateCartCount() {
         const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.clearSession();
+            countElement.textContent = '0';
+            return;
+        }
         const cart = await readJsonResponse(res, 'Unable to load cart count');
         const totalItems = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
         countElement.textContent = totalItems;
@@ -163,6 +168,10 @@ async function addToCart(productId) {
             },
             body: JSON.stringify({ product_id: productId, quantity: 1 })
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         const result = await readJsonResponse(res, 'Unable to add to cart');
         if (result.success) {
             updateCartCount();

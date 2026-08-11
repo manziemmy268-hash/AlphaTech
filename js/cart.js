@@ -14,6 +14,10 @@ async function renderCart() {
         const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         const cart = await readJsonResponse(res, 'Unable to load cart');
         
         if (cart.length === 0) {
@@ -62,7 +66,7 @@ async function updateQuantity(id, newQuantity) {
     }
     
     try {
-        await fetch(`${API_URL}/cart/${id}`, {
+        const res = await fetch(`${API_URL}/cart/${id}`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -70,6 +74,10 @@ async function updateQuantity(id, newQuantity) {
             },
             body: JSON.stringify({ quantity: newQuantity })
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         renderCart();
         updateCartCount();
     } catch (err) {
@@ -79,10 +87,14 @@ async function updateQuantity(id, newQuantity) {
 
 async function removeFromCart(id) {
     try {
-        await fetch(`${API_URL}/cart/${id}`, {
+        const res = await fetch(`${API_URL}/cart/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         renderCart();
         updateCartCount();
     } catch (err) {

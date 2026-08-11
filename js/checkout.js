@@ -15,6 +15,10 @@ async function loadOrderSummary() {
         const res = await fetch(`${API_URL}/cart`, {
             headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
         });
+        if (res.status === 401 || res.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         const cart = await readJsonResponse(res, 'Unable to load checkout summary');
         
         if (cart.length === 0) {
@@ -98,6 +102,10 @@ async function processCheckout() {
             })
         });
 
+        if (orderRes.status === 401 || orderRes.status === 403) {
+            Auth.handleAuthFailure('Session expired. Please log in again.');
+            return;
+        }
         const orderData = await readJsonResponse(orderRes, 'Order creation failed');
         if (!orderRes.ok) throw new Error(orderData.message || 'Order creation failed');
 
