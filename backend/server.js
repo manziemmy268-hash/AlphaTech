@@ -52,7 +52,7 @@ app.use(express.json({ limit: '1mb' }));
 // Rate limiters
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 20,
     message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -60,7 +60,7 @@ const authLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 600,
     message: { success: false, message: 'Too many requests. Please slow down.' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -262,7 +262,7 @@ try {
 }
 
 // Generate SKUs for existing products
-db.prepare(`UPDATE products SET sku = 'PHN-' || printf('%04d', id) WHERE sku IS NULL`).run();
+// (runs again after product sync below so newly-synced products also get SKUs)
 
 // Seed some default featured products if none exist
 try {
@@ -339,6 +339,9 @@ const productsSeed = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data
     } catch (err) {
         console.error('Could not seed products:', err.message);
     }
+
+    // Ensure every product has a SKU (fresh inserts from the sync get one here)
+    db.prepare(`UPDATE products SET sku = 'PHN-' || printf('%04d', id) WHERE sku IS NULL`).run();
 }
 
 // ============================================
@@ -668,7 +671,7 @@ app.get('/api/products/related/:id', (req, res) => {
 // GET /api/products/:id — single product with variants and images
 app.get('/api/products/:id', (req, res) => {
     const row = db.prepare(`SELECT ${productCols} ${productJoins} WHERE p.id = ?`).get(req.params.id);
-    if (!row) return res.status(404).json({ error: 'Product not found' });
+    if (!row) return res.status(404).json({ success: false, message: 'Product not found.' });
 
     row.variants = db.prepare("SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order").all(row.id);
     row.gallery = db.prepare("SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order").all(row.id);
@@ -855,9 +858,9 @@ app.get('/api/orders', authenticateToken, (req, res) => {
 
 app.get('/api/orders/:id', authenticateToken, (req, res) => {
     const order = db.prepare("SELECT * FROM orders WHERE id = ?").get(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
     if (order.user_id !== req.user.id && req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Unauthorized' });
+        return res.status(403).json({ success: false, message: 'Unauthorized.' });
     }
     order.items = db.prepare(`SELECT oi.*, p.name, p.image, p.brand
         FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?`).all(order.id);
@@ -871,12 +874,29 @@ app.post('/pay', authenticateToken, async (req, res) => {
     try {
         const { phoneNumber, amount, orderId, currency = 'RWF' } = req.body;
         if (!phoneNumber || !amount) {
-            return res.status(400).json({ error: 'Phone number and amount are required' });
+            return res.status(400).json({ success: false, message: 'Phone number and amount are required.' });
+        }
+        if (!orderId) {
+            return res.status(400).json({ success: false, message: 'Order ID is required.' });
+        }
+
+        const order = db.prepare("SELECT id, user_id, status, total_amount FROM orders WHERE id = ?").get(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
+        }
+        if (order.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Unauthorized.' });
+        }
+        if (order.status === 'paid') {
+            return res.status(400).json({ success: false, message: 'This order has already been paid.' });
+        }
+        if (Number(amount) !== Number(order.total_amount)) {
+            return res.status(400).json({ success: false, message: 'Payment amount does not match the order total.' });
         }
 
         const referenceId = uuidv4();
         db.prepare(`INSERT INTO transactions (order_id, reference_id, phone_number, amount, currency, status)
-            VALUES (?, ?, ?, ?, ?, 'PENDING')`).run(orderId || null, referenceId, phoneNumber, Number(amount), currency);
+            VALUES (?, ?, ?, ?, ?, 'PENDING')`).run(orderId, referenceId, phoneNumber, Number(amount), currency);
 
         console.log(`[MoMo] ${amount} ${currency} for ${phoneNumber} | Ref: ${referenceId}`);
 
@@ -889,21 +909,22 @@ app.post('/pay', authenticateToken, async (req, res) => {
         setTimeout(() => {
             db.transaction(() => {
                 db.prepare("UPDATE transactions SET status = 'SUCCESSFUL' WHERE reference_id = ?").run(referenceId);
-                if (orderId) {
-                    db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(orderId);
-                }
+                db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(orderId);
             })();
             console.log(`[MoMo] ${referenceId} -> SUCCESSFUL`);
         }, 5000);
     } catch (error) {
         console.error('Payment error:', error);
-        res.status(500).json({ error: 'Payment initialization failed' });
+        res.status(500).json({ success: false, message: 'Payment initialization failed.' });
     }
 });
 
 app.get('/status/:referenceId', (req, res) => {
     const tx = db.prepare("SELECT * FROM transactions WHERE reference_id = ?").get(req.params.referenceId);
-    res.json({ referenceId: req.params.referenceId, status: tx ? tx.status : 'PENDING' });
+    if (!tx) {
+        return res.status(404).json({ success: false, message: 'Payment reference not found.' });
+    }
+    res.json({ referenceId: req.params.referenceId, status: tx.status });
 });
 
 // ============================================

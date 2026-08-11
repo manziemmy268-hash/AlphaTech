@@ -3,7 +3,7 @@ const CatalogUI = {
         const r = Math.round(rating || 0);
         return '<span class="stars" aria-label="' + r + ' out of 5 stars">' +
             [1,2,3,4,5].map(i =>
-                `<i class="fas fa-star${i <= r ? '' : ' fa-star-o'}" style="color:${i <= r ? '#f59e0b' : '#d1d5db'}"></i>`
+                `<i class="${i <= r ? 'fas' : 'far'} fa-star" style="color:${i <= r ? '#f59e0b' : '#d1d5db'}"></i>`
             ).join('') +
             '</span>';
     },

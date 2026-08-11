@@ -125,14 +125,25 @@ async function processCheckout() {
         });
 
         const payData = await readJsonResponse(payRes, 'Payment failed');
-        if (!payRes.ok) throw new Error(payData.error || 'Payment failed');
+        if (!payRes.ok) throw new Error(payData.message || payData.error || 'Payment failed');
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Awaiting PIN approval on phone...';
 
-        // Step 3: Poll for Status
+        // Step 3: Poll for Status (max 30 attempts / ~60 seconds)
+        let attempts = 0;
+        const maxAttempts = 30;
         const pollInterval = setInterval(async () => {
+            attempts++;
             try {
                 const statusRes = await fetch(`${paymentBaseUrl}/status/${payData.referenceId}`);
+
+                if (statusRes.status === 404) {
+                    clearInterval(pollInterval);
+                    alert('Payment reference expired. Please try again.');
+                    resetCheckout(btn, formInputs);
+                    return;
+                }
+
                 const statusData = await readJsonResponse(statusRes, 'Unable to check payment status');
 
                 if (statusData.status === 'SUCCESSFUL') {
@@ -142,9 +153,18 @@ async function processCheckout() {
                     clearInterval(pollInterval);
                     alert('MoMo Payment failed.');
                     resetCheckout(btn, formInputs);
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(pollInterval);
+                    alert('Payment is taking too long. Please check your phone or contact support.');
+                    resetCheckout(btn, formInputs);
                 }
             } catch (err) {
                 console.error('Polling error:', err);
+                if (attempts >= maxAttempts) {
+                    clearInterval(pollInterval);
+                    alert('Unable to confirm payment. Please check your phone or contact support.');
+                    resetCheckout(btn, formInputs);
+                }
             }
         }, 2000);
 
