@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /checkout.html
+Disallow: /cart.html
+Disallow: /settings.html
+
+Sitemap: https://alphatech-1y7.pages.dev/sitemap.xml

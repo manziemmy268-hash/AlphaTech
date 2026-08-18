@@ -478,7 +478,7 @@ app.post('/api/forgot-password', (req, res) => {
         .run(email, token, expiresAt);
 
     const resetLink = `${req.protocol}://${req.get('host')}/reset-password.html?token=${token}`;
-    console.log(`[EMAIL] To: ${email} | Reset: ${resetLink}`);
+    console.log(`[EMAIL] Password reset requested for: ${email}`);
 
     res.json({ success: true, message: 'If this email is registered, a password reset link will be sent.' });
 });
@@ -827,7 +827,8 @@ app.post('/api/orders', authenticateToken, (req, res) => {
             return { error: `Insufficient stock for: ${outOfStock.map(i => i.name).join(', ')}` };
         }
 
-        const total = Number(cartItems.reduce((s, i) => s + Number(i.price) * i.quantity, 0).toFixed(2));
+        const subtotal = Number(cartItems.reduce((s, i) => s + Number(i.price) * i.quantity, 0).toFixed(2));
+        const total = Number((subtotal * 1.08).toFixed(2));
         const orderResult = db.prepare(`INSERT INTO orders (user_id, total_amount, shipping_name, shipping_email, shipping_address, shipping_city)
             VALUES (?, ?, ?, ?, ?, ?)`).run(req.user.id, total, shipping_name, shipping_email, shipping_address, shipping_city);
 
@@ -898,7 +899,7 @@ app.post('/pay', authenticateToken, async (req, res) => {
         db.prepare(`INSERT INTO transactions (order_id, reference_id, phone_number, amount, currency, status)
             VALUES (?, ?, ?, ?, ?, 'PENDING')`).run(orderId, referenceId, phoneNumber, Number(amount), currency);
 
-        console.log(`[MoMo] ${amount} ${currency} for ${phoneNumber} | Ref: ${referenceId}`);
+        console.log(`[MoMo] ${amount} ${currency} | Ref: ${referenceId}`);
 
         res.status(202).json({
             status: 'PENDING',

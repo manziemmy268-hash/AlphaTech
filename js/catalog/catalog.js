@@ -93,7 +93,7 @@
             CatalogAPI.getFeatured().then(function (data) {
                 const products = data?.products || data || [];
                 if (products.length) {
-                    featuredGrid.innerHTML = products.map(p => CatalogUI.card(p, { lazy: true })).join('');
+                    featuredGrid.innerHTML = products.map(p => CatalogUI.card(p, { lazy: false })).join('');
                     if (typeof setupScrollAnimations === 'function') setupScrollAnimations();
                 }
             }).catch(function (err) {
