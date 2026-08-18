@@ -216,7 +216,8 @@ function showToast(message) {
     
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = `<i class="fas fa-check-circle"></i> <span>${message}</span>`;
+    toast.innerHTML = `<i class="fas fa-check-circle"></i> <span></span>`;
+    toast.querySelector('span').textContent = message;
     container.appendChild(toast);
     
     // Trigger reflow to start animation

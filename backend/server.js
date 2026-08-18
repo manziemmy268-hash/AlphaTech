@@ -14,10 +14,14 @@ const jwt = require('jsonwebtoken');
 
 // JWT_SECRET is required for auth, but we provide a safe fallback for local development
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
-const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? 'replace-me-in-production' : 'dev-secret-change-me');
 if (!process.env.JWT_SECRET) {
+    if (isProduction) {
+        console.error('FATAL: JWT_SECRET must be set in production.');
+        process.exit(1);
+    }
     console.warn('JWT_SECRET not set. Using a development fallback secret.');
 }
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 const PORT = process.env.PORT || (isProduction ? 3000 : 3001);
 
@@ -29,7 +33,15 @@ app.set('trust proxy', 1);
 // Security headers
 app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+        }
+    },
 }));
 
 // HTTPS redirect
@@ -42,6 +54,9 @@ app.use((req, res, next) => {
 
 // CORS
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
+if (isProduction && ALLOWED_ORIGINS === '*') {
+    console.error('WARNING: ALLOWED_ORIGINS is set to wildcard in production.');
+}
 app.use(cors(ALLOWED_ORIGINS === '*'
     ? { origin: '*' }
     : { origin: ALLOWED_ORIGINS, credentials: true }
@@ -277,13 +292,15 @@ try {
 
 console.log('Migrations applied.');
 
-// Seed admin
-const adminCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
-if (adminCount.count === 0) {
-    const hash = bcrypt.hashSync('admin123', 10);
-    db.prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)")
-        .run('Admin', 'admin@phonne.com', hash, 'admin');
-    console.log('Default admin seeded (admin@phonne.com / admin123)');
+// Seed admin (development only)
+if (!isProduction) {
+    const adminCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
+    if (adminCount.count === 0) {
+        const hash = bcrypt.hashSync('admin123', 10);
+        db.prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)")
+            .run('Admin', 'admin@phonne.com', hash, 'admin');
+        console.log('Default admin seeded (admin@phonne.com / admin123)');
+    }
 }
 
 // Seed products
@@ -408,6 +425,9 @@ app.post('/api/register', async (req, res) => {
         if (!username || !username.trim()) {
             return res.status(400).json({ success: false, message: 'Name is required.' });
         }
+        if (username.trim().length > 100) {
+            return res.status(400).json({ success: false, message: 'Name too long (max 100 characters).' });
+        }
         if (!email || !EMAIL_RE.test(email)) {
             return res.status(400).json({ success: false, message: 'A valid email address is required.' });
         }
@@ -474,6 +494,7 @@ app.post('/api/forgot-password', (req, res) => {
 
     const token = uuidv4();
     const expiresAt = new Date(Date.now() + 3600000).toISOString();
+    db.prepare("DELETE FROM password_resets WHERE expires_at < CURRENT_TIMESTAMP").run();
     db.prepare("INSERT INTO password_resets (user_email, token, expires_at) VALUES (?, ?, ?)")
         .run(email, token, expiresAt);
 
@@ -690,7 +711,7 @@ app.post('/api/products', authenticateToken, requireAdmin, (req, res) => {
     const cat = db.prepare("SELECT id FROM categories WHERE name = ?").get(nb);
     const result = db.prepare(`INSERT INTO products (name, brand, category_id, price, description, image, specs_processor, specs_display, specs_camera, specs_battery, stock, sku, badge, featured)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
+        .run(normalizeName(name), nb, cat ? cat.id : null, price, sanitizeText(description), normalizeImage(image),
             specs_processor, specs_display, specs_camera, specs_battery, stock || 10,
             sku || null, badge || null, featured ? 1 : 0);
     const id = result.lastInsertRowid;
@@ -708,7 +729,7 @@ app.put('/api/products/:id', authenticateToken, requireAdmin, (req, res) => {
     const cat = db.prepare("SELECT id FROM categories WHERE name = ?").get(nb);
     db.prepare(`UPDATE products SET name=?, brand=?, category_id=?, price=?, description=?, image=?,
         specs_processor=?, specs_display=?, specs_camera=?, specs_battery=?, stock=?, sku=?, badge=?, featured=? WHERE id=?`)
-        .run(normalizeName(name), nb, cat ? cat.id : null, price, description, normalizeImage(image),
+        .run(normalizeName(name), nb, cat ? cat.id : null, price, sanitizeText(description), normalizeImage(image),
             specs_processor, specs_display, specs_camera, specs_battery, stock, sku || null, badge || null, featured ? 1 : 0, req.params.id);
     res.json({ success: true, message: 'Product updated!' });
 });
@@ -777,8 +798,12 @@ app.post('/api/cart', authenticateToken, (req, res) => {
 
 app.put('/api/cart/:id', authenticateToken, (req, res) => {
     try {
+        const qty = Math.max(1, Math.min(99, Number(req.body.quantity) || 1));
+        const item = db.prepare("SELECT ci.id, ci.product_id, p.stock FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.id = ? AND ci.user_id = ?").get(req.params.id, req.user.id);
+        if (!item) return res.status(404).json({ success: false, message: 'Cart item not found.' });
+        if (qty > item.stock) return res.status(400).json({ success: false, message: `Only ${item.stock} in stock.` });
         db.prepare("UPDATE cart_items SET quantity = ? WHERE id = ? AND user_id = ?")
-            .run(Math.max(1, Math.min(99, Number(req.body.quantity) || 1)), req.params.id, req.user.id);
+            .run(qty, req.params.id, req.user.id);
         res.json({ success: true, message: 'Cart updated.' });
     } catch (err) {
         console.error('Error updating cart:', err);
@@ -834,12 +859,15 @@ app.post('/api/orders', authenticateToken, (req, res) => {
 
         const orderId = orderResult.lastInsertRowid;
         const insertItem = db.prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
-        const updateStock = db.prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+        const updateStock = db.prepare("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?");
 
-        cartItems.forEach(item => {
+        for (const item of cartItems) {
             insertItem.run(orderId, item.product_id, item.quantity, Number(item.price));
-            updateStock.run(item.quantity, item.product_id);
-        });
+            const result = updateStock.run(item.quantity, item.product_id, item.quantity);
+            if (result.changes === 0) {
+                throw new Error(`Insufficient stock for: ${item.name}`);
+            }
+        }
 
         db.prepare("DELETE FROM cart_items WHERE user_id = ?").run(req.user.id);
         return { success: true, orderId, totalAmount: total, message: 'Order placed!' };
