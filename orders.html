@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | Phonne</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://alphatech-hu3y.onrender.com">
+    <link rel="preconnect" href="https://alphatech-hu3y.onrender.com">
+    <script src="js/auth.js"></script>
+    <script>Auth.requireAuth();</script>
+    <style>
+        .orders-container {
+            max-width: 900px;
+            margin: calc(var(--navbar-height) + 2rem) auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+        }
+        .breadcrumb a { color: var(--primary-color); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .current { color: var(--text-color); font-weight: 500; }
+
+        .order-card {
+            background: var(--card-bg);
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            border-color: rgba(10,132,255,0.28);
+        }
+
+        .badge-pending { background: rgba(255,149,0,0.1); color: #f08c00; }
+        .badge-paid { background: rgba(52,199,89,0.1); color: #34c759; }
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .detail-section h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+        .order-info-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+        .order-info-item span {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-items-table th {
+            padding: 0.8rem 1rem;
+            color: var(--secondary-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            text-align: left;
+        }
+        .order-items-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.95rem;
+        }
+        .order-items-table td a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .order-items-table td a:hover { color: var(--primary-color); }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+        }
+        .summary-total {
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 0.8rem;
+            margin-top: 0.8rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .order-card { grid-template-columns: 1fr; gap: 0.8rem; padding: 1.5rem; }
+            .order-info-grid { grid-template-columns: 1fr; }
+            .order-items-table th, .order-items-table td { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-mobile-alt"></i> Phonne
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li id="nav-auth-links"></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="orders-container">
+        <div id="orders-list-view">
+            <h1 style="font-size: 1.8rem; margin-bottom: 0.5rem;">My Orders</h1>
+            <p style="color: var(--secondary-color); margin-bottom: 2rem;">View and track your purchases.</p>
+            <div id="orders-container"></div>
+        </div>
+
+        <div id="order-detail-view" style="display: none;">
+            <nav class="breadcrumb">
+                <a href="orders.html">My Orders</a> &nbsp;/&nbsp; <span class="current">Order #<span id="detail-order-id"></span></span>
+            </nav>
+            <div id="order-detail-container"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                &copy; 2026 Phonne Store. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js?v=20260809"></script>
+    <script src="js/app.js"></script>
+    <script src="js/orders.js"></script>
+</body>
+</html>

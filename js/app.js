@@ -296,6 +296,7 @@ function setupMobileNav() {
                     <i class="fas fa-user-circle"></i> ${user.username}
                 </div>
                 ${user.role === 'admin' ? '<a href="admin.html" class="mobile-nav-link"><i class="fas fa-cog"></i> Dashboard</a>' : ''}
+                <a href="orders.html" class="mobile-nav-link"><i class="fas fa-box"></i> My Orders</a>
                 <a href="settings.html" class="mobile-nav-link"><i class="fas fa-user-cog"></i> Settings</a>
                 <a href="#" class="mobile-nav-link" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             `;

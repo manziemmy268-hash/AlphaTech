@@ -148,7 +148,7 @@ async function processCheckout() {
 
                 if (statusData.status === 'SUCCESSFUL') {
                     clearInterval(pollInterval);
-                    finishCheckout();
+                    finishCheckout(orderData.orderId);
                 } else if (statusData.status === 'FAILED') {
                     clearInterval(pollInterval);
                     alert('MoMo Payment failed.');
@@ -181,7 +181,49 @@ function resetCheckout(btn, formInputs) {
     formInputs.forEach(input => input.disabled = false);
 }
 
-function finishCheckout() {
+async function finishCheckout(orderId) {
     updateCartCount(); // In app.js
-    document.getElementById('success-modal').style.display = 'flex';
+
+    const modal = document.getElementById('success-modal');
+
+    try {
+        const res = await fetch(`${API_URL}/orders/${orderId}`, {
+            headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
+        });
+
+        if (res.ok) {
+            const order = await readJsonResponse(res, null);
+
+            document.getElementById('receipt-order-id').textContent = `#${order.id}`;
+
+            const items = order.items || [];
+            document.getElementById('receipt-items').innerHTML = items.map(item => `
+                <div class="receipt-item">
+                    <span class="receipt-item-name">${escapeHtml(item.name)}</span>
+                    <span class="receipt-item-qty">x${item.quantity}</span>
+                    <span class="receipt-item-price">$${(item.unit_price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            const subtotal = order.total_amount / 1.08;
+            const tax = order.total_amount - subtotal;
+
+            document.getElementById('receipt-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('receipt-tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('receipt-total').textContent = `$${Number(order.total_amount).toFixed(2)}`;
+
+            document.getElementById('receipt-shipping').innerHTML = `
+                <h4>Shipping To</h4>
+                <p>${escapeHtml(order.shipping_name || '')}</p>
+                <p>${escapeHtml(order.shipping_address || '')}, ${escapeHtml(order.shipping_city || '')}</p>
+                <p>${escapeHtml(order.shipping_email || '')}</p>
+            `;
+
+            document.getElementById('view-order-btn').href = `orders.html?id=${order.id}`;
+        }
+    } catch (err) {
+        console.error('Failed to load receipt:', err);
+    }
+
+    modal.style.display = 'flex';
 }

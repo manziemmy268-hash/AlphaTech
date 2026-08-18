@@ -137,15 +137,77 @@
             padding: 3rem;
             border-radius: 20px;
             text-align: center;
-            max-width: 400px;
+            max-width: 460px;
+            width: 90%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .success-icon {
             font-size: 4rem;
             color: #34c759;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
+
+        .receipt-order-label {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .receipt-order-label span { font-weight: 700; color: var(--text-color); }
+
+        .receipt-body {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            background: var(--bg-color, #f5f5f7);
+        }
+
+        .receipt-items {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .receipt-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+        }
+        .receipt-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.75rem; }
+        .receipt-item-qty { color: var(--secondary-color); margin-right: 1rem; min-width: 2.5rem; text-align: center; }
+        .receipt-item-price { font-weight: 600; min-width: 5rem; text-align: right; }
+
+        .receipt-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.88rem;
+            color: var(--secondary-color);
+        }
+        .receipt-grand-total {
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.4rem;
+            padding-top: 0.6rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .receipt-shipping h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--secondary-color);
+            margin: 0.8rem 0 0.3rem;
+        }
+        .receipt-shipping p { font-size: 0.88rem; margin: 0.15rem 0; color: var(--text-color); }
+
+        .receipt-actions { display: flex; flex-direction: column; }
 
         @media (max-width: 900px) {
             .checkout-layout {
@@ -254,9 +316,36 @@
     <div class="modal-overlay" id="success-modal">
         <div class="modal-content" id="modal-inner">
             <i class="fas fa-check-circle success-icon"></i>
-            <h2 style="margin-bottom: 1rem;">Payment Successful!</h2>
-            <p style="color: var(--secondary-color); margin-bottom: 2rem;">Thank you for your order. We are preparing it for shipment.</p>
-            <a href="products.html" class="btn btn-primary" style="width: 100%;">Continue Shopping</a>
+            <h2 style="margin-bottom: 0.3rem;">Payment Successful!</h2>
+            <p class="receipt-order-label">Order <span id="receipt-order-id">#--</span></p>
+
+            <div class="receipt-body" id="receipt-body">
+                <div class="receipt-items" id="receipt-items"></div>
+                <div class="receipt-totals">
+                    <div class="receipt-total-row">
+                        <span>Subtotal</span>
+                        <span id="receipt-subtotal">$0.00</span>
+                    </div>
+                    <div class="receipt-total-row">
+                        <span>Tax (8%)</span>
+                        <span id="receipt-tax">$0.00</span>
+                    </div>
+                    <div class="receipt-total-row receipt-grand-total">
+                        <span>Total</span>
+                        <span id="receipt-total">$0.00</span>
+                    </div>
+                </div>
+                <div class="receipt-shipping" id="receipt-shipping"></div>
+            </div>
+
+            <div class="receipt-actions">
+                <a href="orders.html?id=" id="view-order-btn" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-receipt"></i> View Order
+                </a>
+                <a href="products.html" class="btn btn-secondary" style="width: 100%; margin-top: 0.75rem;">
+                    Continue Shopping
+                </a>
+            </div>
         </div>
     </div>
 

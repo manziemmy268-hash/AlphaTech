@@ -155,6 +155,7 @@ const Auth = {
                     </a>
                     <div class="dropdown-content">
                         ${dashboardLink}
+                        <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
                         <a href="settings.html"><i class="fas fa-user-cog"></i> Settings</a>
                         <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
