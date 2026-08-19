@@ -1,5 +1,5 @@
 /**
- * Phonne Authentication Logic
+ * AlphaTech Authentication Logic
  * Uses backend API and stores JWT in localStorage for persistence.
  */
 
@@ -11,18 +11,18 @@ const Auth = {
 
     // Store token and user
     saveSession: function(token, user) {
-        localStorage.setItem('phonne_jwt_token', token);
-        localStorage.setItem('phonne_currentUser', JSON.stringify(user));
+        localStorage.setItem('alphatech_jwt_token', token);
+        localStorage.setItem('alphatech_currentUser', JSON.stringify(user));
     },
 
     // Get currently logged in user
     getCurrentUser: function() {
-        return JSON.parse(localStorage.getItem('phonne_currentUser')) || null;
+        return JSON.parse(localStorage.getItem('alphatech_currentUser')) || null;
     },
 
     // Get Auth Token
     getToken: function() {
-        return localStorage.getItem('phonne_jwt_token');
+        return localStorage.getItem('alphatech_jwt_token');
     },
 
     // Register a new user via API
@@ -63,15 +63,15 @@ const Auth = {
 
     // Logout user
     logout: function() {
-        localStorage.removeItem('phonne_currentUser');
-        localStorage.removeItem('phonne_jwt_token');
+        localStorage.removeItem('alphatech_currentUser');
+        localStorage.removeItem('alphatech_jwt_token');
         window.location.href = 'index.html';
     },
 
     // Clear session without redirecting (used on auth failures)
     clearSession: function() {
-        localStorage.removeItem('phonne_currentUser');
-        localStorage.removeItem('phonne_jwt_token');
+        localStorage.removeItem('alphatech_currentUser');
+        localStorage.removeItem('alphatech_jwt_token');
     },
 
     // Handle an expired/invalid token response: clear session and send to login
@@ -92,7 +92,7 @@ const Auth = {
     // Get unique cart storage key for current user
     getCartKey: function() {
         const user = this.getCurrentUser();
-        return user ? `phonne_cart_${user.id}` : 'phonne_cart_guest';
+        return user ? `alphatech_cart_${user.id}` : 'alphatech_cart_guest';
     },
 
     // Global protection: only require authentication for account-sensitive pages

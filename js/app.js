@@ -190,7 +190,7 @@ async function addToCart(productId, quantity) {
 
 // Wishlist toggle (stored in localStorage)
 function addToWishlist(productId) {
-    const wishlist = JSON.parse(localStorage.getItem('phonne_wishlist') || '[]');
+    const wishlist = JSON.parse(localStorage.getItem('alphatech_wishlist') || '[]');
     const index = wishlist.indexOf(productId);
     const icon = document.getElementById(`wishlist-icon-${productId}`);
     if (index > -1) {
@@ -202,7 +202,7 @@ function addToWishlist(productId) {
         if (icon) icon.className = 'fas fa-heart';
         showToast('Added to wishlist!');
     }
-    localStorage.setItem('phonne_wishlist', JSON.stringify(wishlist));
+    localStorage.setItem('alphatech_wishlist', JSON.stringify(wishlist));
 }
 
 // Custom Toast Notification System

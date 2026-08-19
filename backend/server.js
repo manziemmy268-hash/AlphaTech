@@ -298,8 +298,8 @@ if (!isProduction) {
     if (adminCount.count === 0) {
         const hash = bcrypt.hashSync('admin123', 10);
         db.prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)")
-            .run('Admin', 'admin@phonne.com', hash, 'admin');
-        console.log('Default admin seeded (admin@phonne.com / admin123)');
+            .run('Admin', 'admin@alphatech.com', hash, 'admin');
+        console.log('Default admin seeded (admin@alphatech.com / admin123)');
     }
 }
 

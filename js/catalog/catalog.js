@@ -72,7 +72,7 @@
                 const detail = new CatalogDetail(productDetailContainer, CatalogAPI);
                 detail.load(parseInt(productId) || productId).then(function (p) {
                     if (p && breadcrumbProductName) breadcrumbProductName.textContent = p.name;
-                    if (p) document.title = p.name + ' - Phonne';
+                    if (p) document.title = p.name + ' - AlphaTech';
                 }).catch(function () {});
             } else {
                 productDetailContainer.innerHTML = `
