@@ -184,16 +184,11 @@
         </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <div class="footer-bottom" style="border: none;">
-                &copy; 2026 AlphaTech Store. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    <footer id="shared-footer"></footer>
 
     <script src="js/config.js?v=20260809"></script>
     <script src="js/app.js"></script>
     <script src="js/orders.js"></script>
+    <script>fetch('js/footer.js').then(r=>r.text()).then(h=>{document.getElementById('shared-footer').outerHTML=h})</script>
 </body>
 </html>

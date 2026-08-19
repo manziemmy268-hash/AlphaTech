@@ -73,6 +73,14 @@
                 detail.load(parseInt(productId) || productId).then(function (p) {
                     if (p && breadcrumbProductName) breadcrumbProductName.textContent = p.name;
                     if (p) document.title = p.name + ' - AlphaTech';
+                    if (p) {
+                        if (p.review_count !== undefined) {
+                            var avgEl = document.getElementById('avg-rating-display');
+                            if (avgEl) avgEl.innerHTML = renderStars(p.average_rating) + ' <span style="color: var(--secondary-color); font-size: 0.9rem;">' + (p.average_rating || 0).toFixed(1) + ' out of 5</span>';
+                        }
+                        if (typeof loadReviews === 'function') loadReviews(p.id);
+                        if (typeof checkReviewEligibility === 'function') checkReviewEligibility(p.id);
+                    }
                 }).catch(function () {});
             } else {
                 productDetailContainer.innerHTML = `

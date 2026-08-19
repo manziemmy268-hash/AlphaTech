@@ -128,8 +128,6 @@
                 <a href="admin.html"><i class="fas fa-th-large"></i> Dashboard</a>
                 <a href="admin-users.html" class="active"><i class="fas fa-users"></i> Users List</a>
                 <a href="products.html"><i class="fas fa-shopping-bag"></i> Live Store</a>
-                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
-                <a href="#"><i class="fas fa-cog"></i> Settings</a>
                 <a href="#" onclick="Auth.logout()" style="margin-top: 5rem;"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </nav>
         </aside>
@@ -209,8 +207,6 @@
                     <td>${new Date(user.created_at).toLocaleDateString()}</td>
                     <td>
                         <div style="display: flex; gap: 0.5rem;">
-                            <!-- Placeholder actions -->
-                            <button class="btn btn-sm" style="background: rgba(0, 113, 227, 0.05); color: var(--primary-color);">View Details</button>
                         </div>
                     </td>
                 </tr>

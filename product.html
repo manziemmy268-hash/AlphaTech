@@ -201,13 +201,7 @@
         <div id="recent-products" style="margin-top: 3rem;"></div>
     </main>
 
-    <footer>
-        <div class="container">
-            <div class="footer-bottom" style="border: none;">
-                &copy; 2026 AlphaTech Store. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    <footer id="shared-footer"></footer>
 
     <script src="js/config.js?v=20260809"></script>
     <script src="js/app.js"></script>
@@ -218,6 +212,7 @@
     <script src="js/catalog/catalog-detail.js"></script>
     <script src="js/catalog/catalog-recent.js"></script>
     <script src="js/catalog/catalog.js"></script>
+    <script>fetch('js/footer.js').then(r=>r.text()).then(h=>{document.getElementById('shared-footer').outerHTML=h})</script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const productId = getQueryParam('id');
@@ -225,19 +220,6 @@
                 window.location.href = 'products.html';
                 return;
             }
-
-            const product = await fetchProductById(productId);
-            if (!product) {
-                document.getElementById('product-detail').innerHTML = '<h2>Product not found.</h2> <a href="products.html" class="btn btn-primary" style="margin-top: 1rem;">Back to Store</a>';
-                return;
-            }
-
-            if (product.review_count !== undefined) {
-                document.getElementById('avg-rating-display').innerHTML = renderStars(product.average_rating) + ' <span style="color: var(--secondary-color); font-size: 0.9rem;">' + (product.average_rating || 0).toFixed(1) + ' out of 5</span>';
-            }
-
-            loadReviews(product.id);
-            checkReviewEligibility(product.id);
         });
 
         function renderStars(rating) {

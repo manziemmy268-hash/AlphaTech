@@ -110,13 +110,7 @@
         <div id="recent-products" style="margin-top: 3rem;"></div>
     </main>
 
-    <footer>
-        <div class="container">
-            <div class="footer-bottom" style="border: none;">
-                &copy; 2026 AlphaTech Store. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    <footer id="shared-footer"></footer>
 
     <script src="js/config.js?v=20260809"></script>
     <script src="js/app.js"></script>
@@ -127,6 +121,8 @@
     <script src="js/catalog/catalog-grid.js"></script>
     <script src="js/catalog/catalog-filters.js"></script>
     <script src="js/catalog/catalog-search.js"></script>
+    <script src="js/catalog/catalog.js"></script>
+    <script>fetch('js/footer.js').then(r=>r.text()).then(h=>{document.getElementById('shared-footer').outerHTML=h})</script>
     <script src="js/catalog/catalog-recent.js"></script>
     <script src="js/catalog/catalog-detail.js"></script>
     <script src="js/catalog/catalog.js"></script>
