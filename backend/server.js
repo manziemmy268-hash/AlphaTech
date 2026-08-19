@@ -1037,7 +1037,7 @@ app.use('/api', (req, res) => {
 });
 
 // Catch-all for non-API routes → custom 404
-app.get('*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
 });
 
