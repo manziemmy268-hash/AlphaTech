@@ -92,7 +92,7 @@
     "stock": 12,
     "badge": "New",
     "featured": 1,
-    "image": "assets/images/s25ultra.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "Galaxy S25 Ultra pushes premium Android performance further with sharper AI tools, an enhanced zoom system, and all-day battery confidence.",
     "specs": {
       "display": "6.8-inch Dynamic AMOLED 2X",
@@ -109,7 +109,7 @@
     "stock": 15,
     "badge": "New",
     "featured": 1,
-    "image": "assets/images/iphone16pro.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "iPhone 16 Pro refines Apple's best-selling formula with a brighter display, stronger efficiency, and a more capable camera system.",
     "specs": {
       "display": "6.3-inch Super Retina XDR",
@@ -126,7 +126,7 @@
     "stock": 11,
     "badge": "New",
     "featured": 1,
-    "image": "assets/images/pixel9pro.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "Pixel 9 Pro delivers clean software, smarter AI features, and excellent photography in a polished flagship design.",
     "specs": {
       "display": "6.7-inch LTPO OLED",
@@ -143,7 +143,7 @@
     "stock": 22,
     "badge": null,
     "featured": 0,
-    "image": "assets/images/oneplus13.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "OnePlus 13 balances speed, fluidity, and fast charging with a premium finish and responsive 120Hz display.",
     "specs": {
       "display": "6.82-inch LTPO AMOLED",
@@ -160,7 +160,7 @@
     "stock": 6,
     "badge": "Premium",
     "featured": 1,
-    "image": "assets/images/xiaomi15ultra.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "Xiaomi 15 Ultra is built for camera-first buyers who want pro-grade zoom, fast performance, and a luxurious finish.",
     "specs": {
       "display": "6.73-inch AMOLED",
@@ -245,7 +245,7 @@
     "stock": 28,
     "badge": null,
     "featured": 0,
-    "image": "assets/images/nokia.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Nokia G60 5G offers a clean Android experience with 3 years of OS upgrades, reliable 5G connectivity and a sturdy eco-conscious build.",
     "specs": {
       "display": "6.58-inch IPS LCD 120Hz",
@@ -262,7 +262,7 @@
     "stock": 16,
     "badge": null,
     "featured": 0,
-    "image": "assets/images/nokia.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Nokia X30 5G comes with a premium recycled aluminium frame, a 50MP selfie camera and guaranteed updates for 3 years.",
     "specs": {
       "display": "6.43-inch pOLED 90Hz",
@@ -279,7 +279,7 @@
     "stock": 12,
     "badge": "New",
     "featured": 1,
-    "image": "assets/images/tecno.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Tecno Phantom X2 Pro surprises with a retractable portrait lens, a strikingly designed glass back, and powerful performance for creators.",
     "specs": {
       "display": "6.8-inch AMOLED 120Hz",
@@ -296,7 +296,7 @@
     "stock": 50,
     "badge": "Budget",
     "featured": 0,
-    "image": "assets/images/tecno.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Tecno Spark 20 Pro+ offers a large display, a 50MP selfie camera, and a long-lasting 5000mAh battery for everyday users on a budget.",
     "specs": {
       "display": "6.78-inch IPS LCD 120Hz",
@@ -313,7 +313,7 @@
     "stock": 5,
     "badge": "Exclusive",
     "featured": 1,
-    "image": "assets/images/s25ultra.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "Galaxy Z Fold 6 redefines productivity with a tablet-like foldable display, enhanced multitasking, and a refined hinge design.",
     "specs": {
       "display": "7.6-inch QXGA+ AMOLED | 6.3-inch Cover",
@@ -364,7 +364,7 @@
     "stock": 10,
     "badge": "Flagship",
     "featured": 1,
-    "image": "assets/images/iphone16pro.svg",
+    "image": "assets/images/placeholder.svg",
     "description": "iPhone 16 Pro Max pushes the limits of performance and camera excellence with the A18 Pro chip and the largest Super Retina XDR display ever.",
     "specs": {
       "display": "6.9-inch Super Retina XDR",
@@ -381,7 +381,7 @@
     "stock": 7,
     "badge": "Creator's Choice",
     "featured": 0,
-    "image": "assets/images/sony.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Sony Xperia 1 VI is made for creators who want cinematic video, alpha-class photography, and a premium Hi-Res audio experience.",
     "specs": {
       "display": "6.5-inch OLED 4K 120Hz",
@@ -398,7 +398,7 @@
     "stock": 9,
     "badge": null,
     "featured": 0,
-    "image": "assets/images/sony.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Sony Xperia 5 VI combines a slim compact body with flagship-grade camera optics, a bright OLED display, and a 3.5mm headphone jack.",
     "specs": {
       "display": "6.1-inch OLED 120Hz",
@@ -415,7 +415,7 @@
     "stock": 19,
     "badge": "Mid-Range King",
     "featured": 0,
-    "image": "assets/images/motorola.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Motorola Edge 50 Pro packs a stunning OLED display, 125W turbo charging, and smart AI features into a mid-range package.",
     "specs": {
       "display": "6.7-inch pOLED 144Hz",
@@ -432,7 +432,7 @@
     "stock": 8,
     "badge": "Foldable",
     "featured": 0,
-    "image": "assets/images/motorola.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Motorola Razr 50 Ultra is a fashion-forward flip phone with the largest external display in its class and AI-powered features.",
     "specs": {
       "display": "6.9-inch pOLED 165Hz | 4-inch Cover",
@@ -466,7 +466,7 @@
     "stock": 11,
     "badge": "AI Camera",
     "featured": 0,
-    "image": "assets/images/honor.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Honor Magic 6 Pro dazzles with a 180MP periscope telephoto camera, a striking curved display, and a powerful Snapdragon 8 Gen 3 chip.",
     "specs": {
       "display": "6.8-inch LTPO AMOLED 120Hz",
@@ -483,7 +483,7 @@
     "stock": 26,
     "badge": "Durable",
     "featured": 0,
-    "image": "assets/images/honor.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Honor X9b comes with military-grade durability, a large 108MP camera, and a massive 5800mAh battery â€” built to last all day and more.",
     "specs": {
       "display": "6.78-inch AMOLED 90Hz",
@@ -534,7 +534,7 @@
     "stock": 24,
     "badge": "Eco-Friendly",
     "featured": 0,
-    "image": "assets/images/nokia.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Nokia G42 5G is a repairable, sustainable smartphone with iFixit support, 5G connectivity, and a clean Android experience.",
     "specs": {
       "display": "6.56-inch IPS LCD 90Hz",
@@ -551,7 +551,7 @@
     "stock": 17,
     "badge": "Camera Star",
     "featured": 0,
-    "image": "assets/images/tecno.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Tecno Camon 20 Premier wows with a 50MP OIS periscope zoom camera, Segmented RGBW sensor, and a curved AMOLED display.",
     "specs": {
       "display": "6.67-inch Curved AMOLED 120Hz",
@@ -568,7 +568,7 @@
     "stock": 33,
     "badge": "Best Budget 5G",
     "featured": 0,
-    "image": "assets/images/motorola.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Moto G85 5G packs a vegan leather back, a crisp pOLED display, and Snapdragon 6s Gen 3 at a price that's hard to beat.",
     "specs": {
       "display": "6.67-inch pOLED 120Hz",
@@ -585,7 +585,7 @@
     "stock": 13,
     "badge": "Portrait Master",
     "featured": 0,
-    "image": "assets/images/honor.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Honor 200 Pro is a portrait photography powerhouse co-engineered with Harcourt Paris, featuring a 50MP triple camera and smooth 120Hz OLED.",
     "specs": {
       "display": "6.78-inch LTPS OLED 120Hz",
@@ -602,7 +602,7 @@
     "stock": 10,
     "badge": null,
     "featured": 0,
-    "image": "assets/images/sony.jpg",
+    "image": "assets/images/placeholder.svg",
     "description": "Sony Xperia 10 VI is a slim, lightweight mid-ranger with all-day battery life, a bright OLED screen, and Sony's signature audio DNA.",
     "specs": {
       "display": "6.1-inch OLED 60Hz",
