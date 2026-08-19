@@ -212,8 +212,6 @@
                 <a href="admin.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
                 <a href="admin-users.html"><i class="fas fa-users"></i> Users List</a>
                 <a href="products.html"><i class="fas fa-shopping-bag"></i> Live Store</a>
-                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
-                <a href="#"><i class="fas fa-cog"></i> Settings</a>
                 <a href="#" onclick="Auth.logout()" style="margin-top: 5rem;"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </nav>
         </aside>
@@ -237,11 +235,11 @@
                 </div>
                 <div class="stat-card">
                     <h3>Total Orders</h3>
-                    <p id="stat-brands">0</p>
+                    <p id="stat-orders">0</p>
                 </div>
                 <div class="stat-card">
                     <h3>Active Users</h3>
-                    <p id="stat-min-price">0</p>
+                    <p id="stat-users">0</p>
                 </div>
                 <div class="stat-card">
                     <h3>Total Revenue</h3>
@@ -263,7 +261,7 @@
             <div class="product-table-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 1.25rem;">Recent Products</h2>
-                    <input type="text" placeholder="Search table..." class="form-control" style="width: 250px; padding: 0.5rem 1rem;">
+                    <input type="text" placeholder="Search table..." class="form-control" id="admin-product-search" style="width: 250px; padding: 0.5rem 1rem;">
                 </div>
                 <table>
                     <thead>
@@ -352,6 +350,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
             setupModal();
+            const searchInput = document.getElementById('admin-product-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase();
+                    const filtered = (window._adminProducts || []).filter(p => 
+                        p.name.toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q)
+                    );
+                    const tbody = document.getElementById('admin-product-table');
+                    if (filtered.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No products match your search.</td></tr>';
+                    } else {
+                        renderAdminTable(filtered);
+                    }
+                });
+            }
         });
 
         async function loadDashboard() {
@@ -363,9 +376,9 @@
                 const stats = await statsRes.json();
                 
                 document.getElementById('stat-total').textContent = stats.totalProducts;
-                document.getElementById('stat-brands').textContent = stats.totalOrders;
-                document.getElementById('stat-min-price').textContent = stats.totalUsers;
-                document.getElementById('stat-revenue').textContent = `$${stats.totalRevenue.toFixed(0)}`;
+                document.getElementById('stat-orders').textContent = stats.totalOrders;
+                document.getElementById('stat-users').textContent = stats.totalUsers;
+                document.getElementById('stat-revenue').textContent = `RWF ${Number(stats.totalRevenue).toLocaleString()}`;
                 document.getElementById('stat-low-stock').textContent = stats.lowStockCount;
                 
                 const lowStockEl = document.getElementById('stat-low-stock');
@@ -395,7 +408,7 @@
                     panel.style.display = 'block';
                     list.innerHTML = items.map(item => `
                         <div style="background: white; padding: 1rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; border: 1px solid rgba(250, 82, 82, 0.2);">
-                            <img src="${item.image}" style="width: 40px; height: 40px; object-fit: contain;">
+                            <img src="${item.image}" alt="${escapeHtml(item.name)}" style="width: 40px; height: 40px; object-fit: contain;">
                             <div>
                                 <strong style="font-size: 0.9rem; display: block;">${item.name}</strong>
                                 <span style="font-size: 0.8rem; color: #fa5252; font-weight: 600;">Only ${item.stock} remaining</span>
@@ -412,6 +425,7 @@
 
         function renderAdminTable(products) {
             const tbody = document.getElementById('admin-product-table');
+            window._adminProducts = products;
             if (products.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No products found. Add some to get started!</td></tr>';
                 return;
@@ -424,7 +438,7 @@
                     <tr>
                         <td>
                             <div style="display: flex; align-items: center; gap: 1rem;">
-                                <img src="${product.image}" alt="" style="width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 4px;">
+                                <img src="${product.image}" alt="${escapeHtml(product.name)}" style="width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 4px;">
                                 <span style="font-weight: 500;">${product.name}</span>
                             </div>
                         </td>
@@ -434,7 +448,7 @@
                                 ${product.stock} ${isLow ? '<i class="fas fa-exclamation-circle" style="font-size: 0.8rem;"></i>' : ''}
                             </span>
                         </td>
-                        <td>$${product.price}</td>
+                        <td>RWF ${Number(product.price).toLocaleString()}</td>
                         <td>
                             <div style="display: flex; gap: 0.5rem;">
                                 <a href="product.html?id=${product.id}" target="_blank" class="btn btn-sm" style="background: rgba(0, 113, 227, 0.05); color: var(--primary-color); text-decoration: none;">

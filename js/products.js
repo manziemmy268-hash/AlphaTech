@@ -135,7 +135,7 @@ function renderProducts() {
                     ${renderStars(product.average_rating || 0)}
                     <span style="color: var(--secondary-color);">(${product.review_count || 0})</span>
                 </div>
-                <p class="product-price">$${product.price}</p>
+                <p class="product-price">RWF ${Number(product.price).toLocaleString()}</p>
                 <div style="display: flex; gap: 0.5rem; padding-bottom: 1rem;">
                     <a href="product.html?id=${product.id}" class="btn" style="border: 1px solid var(--primary-color); color: var(--primary-color); flex: 1;">Details</a>
                     <button class="btn btn-primary" style="flex: 1;" onclick="handleAddToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>

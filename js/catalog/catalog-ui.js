@@ -38,7 +38,7 @@ const CatalogUI = {
                         ${this.stars(product.average_rating)}
                         <span style="color:var(--secondary-color)">(${product.review_count || 0})</span>
                     </div>
-                    <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+                    <p class="product-price">RWF ${Number(product.price).toLocaleString()}</p>
                     <div style="display:flex;gap:0.5rem;padding-bottom:0.5rem">
                         <a href="product.html?id=${product.id}" class="btn" style="border:1px solid var(--primary-color);color:var(--primary-color);flex:1;text-decoration:none;text-align:center">Details</a>
                         <button class="btn btn-primary" style="flex:1" onclick="handleAddToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''} aria-label="Add ${product.name} to cart">

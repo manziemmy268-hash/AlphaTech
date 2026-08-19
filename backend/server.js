@@ -1036,6 +1036,11 @@ app.use('/api', (req, res) => {
     res.status(404).json({ success: false, message: 'Route not found.' });
 });
 
+// Catch-all for non-API routes → custom 404
+app.get('*', (req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+});
+
 // ============================================
 // START
 // ============================================

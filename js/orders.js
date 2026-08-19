@@ -54,7 +54,7 @@ async function loadOrdersList() {
                         <div style="font-size: 0.85rem; color: var(--secondary-color);">${date}</div>
                     </div>
                     <span class="badge ${statusClass}">${statusLabel}</span>
-                    <div style="font-weight: 700; color: var(--primary-color);">$${Number(order.total_amount).toFixed(2)}</div>
+                    <div style="font-weight: 700; color: var(--primary-color);">RWF ${Number(order.total_amount).toLocaleString()}</div>
                 </a>
             `;
         }).join('');
@@ -122,8 +122,8 @@ async function loadOrderDetail(orderId) {
                     </div>
                 </td>
                 <td style="text-align: center;">${item.quantity}</td>
-                <td>$${Number(item.unit_price).toFixed(2)}</td>
-                <td style="font-weight: 600;">$${(item.unit_price * item.quantity).toFixed(2)}</td>
+                <td>RWF ${Number(item.unit_price).toLocaleString()}</td>
+                <td style="font-weight: 600;">RWF ${(item.unit_price * item.quantity).toLocaleString()}</td>
             </tr>
         `).join('');
 
@@ -148,7 +148,7 @@ async function loadOrderDetail(orderId) {
                     </div>
                     <div class="order-info-item">
                         <label>Total</label>
-                        <span style="color: var(--primary-color); font-size: 1.1rem;">$${Number(order.total_amount).toFixed(2)}</span>
+                        <span style="color: var(--primary-color); font-size: 1.1rem;">RWF ${Number(order.total_amount).toLocaleString()}</span>
                     </div>
                 </div>
             </div>
@@ -192,15 +192,15 @@ async function loadOrderDetail(orderId) {
                 <div style="max-width: 300px; margin-left: auto; margin-top: 1.5rem;">
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span>$${subtotal.toFixed(2)}</span>
+                        <span>RWF ${subtotal.toLocaleString()}</span>
                     </div>
                     <div class="summary-row">
                         <span>Tax (8%)</span>
-                        <span>$${tax.toFixed(2)}</span>
+                        <span>RWF ${tax.toLocaleString()}</span>
                     </div>
                     <div class="summary-row summary-total">
                         <span>Total</span>
-                        <span>$${Number(order.total_amount).toFixed(2)}</span>
+                        <span>RWF ${Number(order.total_amount).toLocaleString()}</span>
                     </div>
                 </div>
             </div>

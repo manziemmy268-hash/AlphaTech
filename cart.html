@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart | Phonne</title>
+    <meta name="description" content="Review and manage items in your Phonne shopping cart before checkout.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -164,14 +165,14 @@
                     </div>
                     <div class="summary-row">
                         <span>Tax</span>
-                        <span id="tax">$0.00</span>
+                        <span id="tax">RWF 0</span>
                     </div>
                     <div class="summary-row summary-total">
                         <span>Total</span>
-                        <span id="total">$0.00</span>
+                        <span id="total">RWF 0</span>
                     </div>
                 </div>
-                <button onclick="window.location.href='checkout.html'" class="btn btn-primary" style="width: 100%; margin-top: 2rem; padding: 1.2rem;">
+                <button id="checkout-btn" onclick="window.location.href='checkout.html'" class="btn btn-primary" style="width: 100%; margin-top: 2rem; padding: 1.2rem;" disabled>
                     Checkout
                 </button>
             </aside>

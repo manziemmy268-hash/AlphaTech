@@ -88,7 +88,7 @@ class CatalogDetail {
                         <span style="color:var(--secondary-color);font-size:0.9rem">(${p.review_count || 0} reviews)</span>
                     </div>
                     <p class="product-price" style="font-size:2rem;margin:0.5rem 0" itemprop="price" content="${p.price}">
-                        $${Number(p.price).toFixed(2)}
+                        RWF ${Number(p.price).toLocaleString()}
                     </p>
                     <p style="font-size:0.9rem;color:${p.stock > 0 ? '#34c759' : '#ff3b30'};font-weight:600">
                         ${p.stock > 0 ? `In Stock (${p.stock} available)` : 'Out of Stock'}
