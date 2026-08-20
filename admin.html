@@ -589,7 +589,7 @@
                 const name = normalizeName(document.getElementById('form-name').value);
                 const brand = normalizeBrand(document.getElementById('form-brand').value);
                 const price = Number(document.getElementById('form-price').value);
-                const image = normalizeImage(urlInput.value) || 'assets/images/placeholder.svg';
+                const image = normalizeImage(urlInput.value) || 'assets/images/google_phone.jpg';
 
                 const validationError = validateForm(name, brand, price, image);
                 if (validationError) {

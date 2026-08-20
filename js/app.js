@@ -140,13 +140,13 @@ function getQueryParam(param) {
 }
 
 function getProductImageSrc(image) {
-    const fallback = 'assets/images/placeholder.svg';
+    const fallback = 'assets/images/google_phone.jpg';
     return image && image.trim() ? image.trim() : fallback;
 }
 
 function handleProductImageError(img) {
     img.onerror = null;
-    img.src = 'assets/images/placeholder.svg';
+    img.src = 'assets/images/google_phone.jpg';
     img.alt = 'Product image unavailable';
     img.classList.add('image-fallback');
 }
