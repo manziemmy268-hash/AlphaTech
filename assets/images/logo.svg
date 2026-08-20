@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" width="220" height="60" role="img" aria-label="AlphaTech Logo">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0057ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b0c8e8;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Phone icon background circle -->
+  <circle cx="28" cy="30" r="22" fill="url(#iconGrad)" opacity="0.15"/>
+
+  <!-- Stylized phone body -->
+  <rect x="18" y="10" width="20" height="34" rx="4" ry="4" fill="none" stroke="url(#iconGrad)" stroke-width="2.2" filter="url(#glow)"/>
+
+  <!-- Phone screen -->
+  <rect x="20.5" y="14" width="15" height="22" rx="1.5" fill="url(#iconGrad)" opacity="0.25"/>
+
+  <!-- Phone home indicator -->
+  <line x1="25" y1="48" x2="31" y2="48" stroke="url(#iconGrad)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Stylised 'A' over the phone -->
+  <path d="M23 38 L28 16 L33 38" stroke="url(#iconGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glow)"/>
+  <line x1="24.8" y1="30" x2="31.2" y2="30" stroke="url(#iconGrad)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Brand name: Alpha -->
+  <text x="58" y="36" font-family="'Segoe UI', 'Inter', Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0.5" fill="url(#textGrad)">Alpha</text>
+
+  <!-- Brand name: Tech in cyan -->
+  <text x="115" y="36" font-family="'Segoe UI', 'Inter', Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0.5" fill="url(#iconGrad)" filter="url(#glow)">Tech</text>
+
+  <!-- Tagline -->
+  <text x="58" y="48" font-family="'Segoe UI', 'Inter', Arial, sans-serif" font-size="7.5" font-weight="400" letter-spacing="2" fill="#6a8daa" text-anchor="start">PREMIUM PHONES</text>
+</svg>
