@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.isLoggedIn()) {
         window.location.href = 'login.html';
         return;
@@ -38,7 +38,7 @@ async function renderCart() {
                 <img src="${getProductImageSrc(item.image)}" alt="${item.name}" loading="lazy" width="80" height="80" onerror="handleProductImageError(this)">
                 <div class="cart-item-info">
                     <h3>${item.name}</h3>
-                    <p class="price">RWF ${Number(item.price).toLocaleString()}</p>
+                    <p class="price">$${Number(item.price).toLocaleString()}</p>
                     <button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button>
                 </div>
                 <div class="quantity-controls">
@@ -47,7 +47,7 @@ async function renderCart() {
                     <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
                 </div>
                 <div style="font-weight: 700; width: 100px; text-align: right;">
-                    RWF ${(item.price * item.quantity).toLocaleString()}
+                    $${(item.price * item.quantity).toLocaleString()}
                 </div>
             </div>
         `).join('');
@@ -106,9 +106,9 @@ function updateSummary(subtotal) {
     const tax = subtotal * 0.08; // 8% tax
     const total = subtotal + tax;
 
-    document.getElementById('subtotal').textContent = `RWF ${subtotal.toLocaleString()}`;
-    document.getElementById('tax').textContent = `RWF ${tax.toLocaleString()}`;
-    document.getElementById('total').textContent = `RWF ${total.toLocaleString()}`;
+    document.getElementById('subtotal').textContent = `$${subtotal.toLocaleString()}`;
+    document.getElementById('tax').textContent = `$${tax.toLocaleString()}`;
+    document.getElementById('total').textContent = `$${total.toLocaleString()}`;
 
     const checkoutBtn = document.getElementById('checkout-btn');
     if (checkoutBtn) checkoutBtn.disabled = subtotal <= 0;

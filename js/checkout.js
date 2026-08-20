@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.isLoggedIn()) {
         window.location.href = 'login.html';
         return;
@@ -33,7 +33,7 @@ async function loadOrderSummary() {
             return `
                 <div class="checkout-item">
                     <span class="checkout-item-name">${item.quantity}x ${item.name}</span>
-                    <span>RWF ${itemTotal.toLocaleString()}</span>
+                    <span>$${itemTotal.toLocaleString()}</span>
                 </div>
             `;
         }).join('');
@@ -41,10 +41,10 @@ async function loadOrderSummary() {
         const tax = subtotal * 0.08;
         const total = subtotal + tax;
 
-        document.getElementById('subtotal').textContent = `RWF ${subtotal.toLocaleString()}`;
-        document.getElementById('tax').textContent = `RWF ${tax.toLocaleString()}`;
-        document.getElementById('total').textContent = `RWF ${total.toLocaleString()}`;
-        document.getElementById('btn-total').textContent = `RWF ${total.toLocaleString()}`;
+        document.getElementById('subtotal').textContent = `$${subtotal.toLocaleString()}`;
+        document.getElementById('tax').textContent = `$${tax.toLocaleString()}`;
+        document.getElementById('total').textContent = `$${total.toLocaleString()}`;
+        document.getElementById('btn-total').textContent = `$${total.toLocaleString()}`;
 
         // Auto-fill from Auth
         const user = Auth.getCurrentUser();
@@ -201,16 +201,16 @@ async function finishCheckout(orderId) {
                 <div class="receipt-item">
                     <span class="receipt-item-name">${escapeHtml(item.name)}</span>
                     <span class="receipt-item-qty">x${item.quantity}</span>
-                    <span class="receipt-item-price">RWF ${(item.unit_price * item.quantity).toLocaleString()}</span>
+                    <span class="receipt-item-price">$${(item.unit_price * item.quantity).toLocaleString()}</span>
                 </div>
             `).join('');
 
             const subtotal = order.total_amount / 1.08;
             const tax = order.total_amount - subtotal;
 
-            document.getElementById('receipt-subtotal').textContent = `RWF ${subtotal.toLocaleString()}`;
-            document.getElementById('receipt-tax').textContent = `RWF ${tax.toLocaleString()}`;
-            document.getElementById('receipt-total').textContent = `RWF ${Number(order.total_amount).toLocaleString()}`;
+            document.getElementById('receipt-subtotal').textContent = `$${subtotal.toLocaleString()}`;
+            document.getElementById('receipt-tax').textContent = `$${tax.toLocaleString()}`;
+            document.getElementById('receipt-total').textContent = `$${Number(order.total_amount).toLocaleString()}`;
 
             document.getElementById('receipt-shipping').innerHTML = `
                 <h4>Shipping To</h4>

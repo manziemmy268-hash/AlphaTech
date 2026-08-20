@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
@@ -192,7 +192,7 @@ db.exec(`
         reference_id TEXT UNIQUE NOT NULL,
         phone_number TEXT NOT NULL,
         amount REAL NOT NULL,
-        currency TEXT DEFAULT 'RWF',
+        currency TEXT DEFAULT 'USD',
         status TEXT DEFAULT 'PENDING',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
@@ -901,7 +901,7 @@ app.get('/api/orders/:id', authenticateToken, (req, res) => {
 // ============================================
 app.post('/pay', authenticateToken, async (req, res) => {
     try {
-        const { phoneNumber, amount, orderId, currency = 'RWF' } = req.body;
+        const { phoneNumber, amount, orderId, currency = 'USD' } = req.body;
         if (!phoneNumber || !amount) {
             return res.status(400).json({ success: false, message: 'Phone number and amount are required.' });
         }
