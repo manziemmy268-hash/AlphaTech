@@ -274,6 +274,9 @@ function setupMobileNav() {
         clone.querySelectorAll('.user-profile-dropdown').forEach(d => {
             d.addEventListener('click', (e) => e.stopPropagation());
         });
+        // Remove auth links from clone — they are handled by syncMobileAuth below
+        const cloneAuthLi = clone.querySelector('#nav-auth-links');
+        if (cloneAuthLi) cloneAuthLi.remove();
 
         // Add search bar at top of mobile panel
         const mobileSearch = document.createElement('div');
