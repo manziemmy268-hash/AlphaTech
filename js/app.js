@@ -274,6 +274,26 @@ function setupMobileNav() {
         clone.querySelectorAll('.user-profile-dropdown').forEach(d => {
             d.addEventListener('click', (e) => e.stopPropagation());
         });
+
+        // Add search bar at top of mobile panel
+        const mobileSearch = document.createElement('div');
+        mobileSearch.className = 'mobile-search-bar';
+        mobileSearch.innerHTML = `
+            <div style="position:relative;margin-bottom:1rem;">
+                <i class="fas fa-search" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--secondary-color);pointer-events:none;"></i>
+                <input type="text" id="mobile-search-input" placeholder="Search devices..." style="width:100%;padding:0.75rem 1rem 0.75rem 2.8rem;border-radius:12px;border:1px solid var(--border-color);background:var(--bg-color);color:var(--text-color);font-size:1rem;font-family:inherit;">
+            </div>
+        `;
+        mobilePanel.appendChild(mobileSearch);
+
+        // Wire mobile search: navigate to products page with query
+        const mobileSearchInput = mobileSearch.querySelector('#mobile-search-input');
+        mobileSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && mobileSearchInput.value.trim()) {
+                window.location.href = `products.html?search=${encodeURIComponent(mobileSearchInput.value.trim())}`;
+            }
+        });
+
         mobilePanel.appendChild(clone);
 
         // Add auth section at bottom

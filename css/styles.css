@@ -1138,3 +1138,265 @@ body.nav-open {
         gap: 1.5rem;
     }
 }
+
+/* ===================================================
+   ENHANCED MOBILE RESPONSIVE STYLES
+   =================================================== */
+
+/* --- Navbar: fix two-row stacking on small screens --- */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+        padding: 0.5rem 1rem;
+        gap: 0.6rem;
+    }
+    .logo img {
+        height: 34px;
+    }
+    .hamburger {
+        order: 3;
+    }
+    .nav-actions {
+        order: 2;
+        width: auto;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 0.8rem;
+    }
+    .search-bar {
+        display: none; /* hide from navbar on mobile; use dedicated search in panel */
+    }
+    .cart-icon {
+        font-size: 1.35rem;
+    }
+    .cart-count {
+        font-size: 0.65rem;
+        padding: 1px 5px;
+    }
+}
+
+/* --- Hero: proper padding & scaling on tiny screens --- */
+@media (max-width: 480px) {
+    .hero {
+        padding-top: calc(var(--navbar-height) + 3rem);
+        padding-bottom: 3.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-bottom-left-radius: 1.2rem;
+        border-bottom-right-radius: 1.2rem;
+    }
+    .hero h1 {
+        font-size: 1.9rem;
+        letter-spacing: -0.02em;
+    }
+    .hero p {
+        font-size: 0.95rem;
+    }
+    .hero-actions .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    .trust-pill {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* --- Product grid: 2-col on tablets, 1-col on phones --- */
+@media (max-width: 900px) and (min-width: 481px) {
+    .products-grid,
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.2rem;
+    }
+}
+
+/* --- Product cards: comfortable on mobile --- */
+@media (max-width: 768px) {
+    .product-card {
+        padding: 1rem;
+        border-radius: 18px;
+    }
+    .product-image {
+        height: 160px;
+        padding: 0.6rem;
+    }
+    .product-name {
+        font-size: 1rem;
+    }
+    .product-price {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    .product-card .btn {
+        font-size: 0.85rem;
+        padding: 0.65rem 1.2rem;
+    }
+}
+
+/* --- Cart page --- */
+@media (max-width: 600px) {
+    .cart-item {
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        padding: 1rem 0;
+        align-items: flex-start;
+    }
+    .cart-item img {
+        width: 72px;
+        height: 72px;
+        border-radius: 10px;
+        object-fit: contain;
+    }
+    .cart-item-info h3 {
+        font-size: 0.95rem;
+    }
+    .quantity-controls {
+        gap: 0.5rem;
+        padding: 0.3rem 0.5rem;
+    }
+    .quantity-btn {
+        min-width: 40px;
+        min-height: 40px;
+    }
+}
+
+/* --- Checkout page --- */
+@media (max-width: 600px) {
+    .checkout-layout,
+    .cart-layout {
+        gap: 1.5rem;
+    }
+    .checkout-form-container,
+    .cart-items,
+    .cart-summary {
+        padding: 1.2rem;
+    }
+    .form-row {
+        grid-template-columns: 1fr !important;
+    }
+    .modal-content {
+        padding: 1.8rem 1.2rem;
+    }
+}
+
+/* --- Product detail page --- */
+@media (max-width: 600px) {
+    .product-details {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    .product-info-header h1 {
+        font-size: 1.6rem !important;
+    }
+    .product-info-header .price {
+        font-size: 1.4rem !important;
+    }
+    .specs-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+    .spec-item {
+        padding: 0.75rem;
+    }
+    .review-card {
+        padding: 1.2rem;
+    }
+}
+
+/* --- Auth pages (login, register, forgot, reset, settings) --- */
+@media (max-width: 600px) {
+    .auth-card,
+    .form-card,
+    .settings-card {
+        padding: 1.5rem 1rem !important;
+        border-radius: 16px;
+    }
+    .auth-container {
+        padding-top: calc(var(--navbar-height) + 1.5rem) !important;
+    }
+}
+
+/* --- Toast: full-width on mobile --- */
+@media (max-width: 480px) {
+    #toast-container {
+        left: 1rem;
+        right: 1rem;
+        bottom: 5rem; /* above mobile admin nav */
+    }
+    .toast {
+        width: 100%;
+    }
+}
+
+/* --- Back-to-top: shift left on mobile to avoid overlap --- */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 5.5rem;
+        left: 1rem;
+    }
+}
+
+/* --- Footer: single column on phones --- */
+@media (max-width: 600px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    footer {
+        padding: 3rem 0 6rem; /* extra bottom padding above mobile nav */
+    }
+}
+
+/* --- Tables in admin: horizontal scroll --- */
+@media (max-width: 768px) {
+    .table-wrapper,
+    .admin-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+    }
+    table {
+        min-width: 600px;
+    }
+}
+
+/* --- Min tap target: all interactive elements --- */
+@media (max-width: 768px) {
+    a, button, input[type="checkbox"], input[type="radio"], select {
+        min-height: 44px;
+    }
+    .btn {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    textarea,
+    select {
+        font-size: 1rem; /* prevents iOS auto-zoom on focus */
+        min-height: 48px;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* --- Section headings: avoid overflow on tiny screens --- */
+@media (max-width: 480px) {
+    .section-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    h2 {
+        font-size: 1.4rem;
+    }
+    h3 {
+        font-size: 1.1rem;
+    }
+}
+
