@@ -627,6 +627,8 @@ footer {
     list-style: none;
     padding: 0;
     margin: 0;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 #mobile-nav-links li {
@@ -656,10 +658,15 @@ footer {
 .mobile-nav-auth {
     margin-top: auto;
     padding-top: 1rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), var(--surface-color) 28%);
+    backdrop-filter: blur(10px);
 }
 
 .mobile-user-info {
