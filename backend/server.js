@@ -114,7 +114,7 @@ app.use('/api', (req, res, next) => {
 // ============================================
 // DATABASE
 // ============================================
-const db = new Database('./database.sqlite');
+const db = new Database(path.join(__dirname, 'database.sqlite'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
