@@ -5,14 +5,24 @@ services:
     repo: https://github.com/manziemmy268-hash/AlphaTech.git
     buildCommand: npm install
     startCommand: npm start
+    # ─────────────────────────────────────────────────────────
+    # IMPORTANT: Set JWT_SECRET manually in Render Dashboard.
+    # NEVER use generateValue: true — that regenerates the
+    # secret on every deploy, logging out all users instantly.
+    # ─────────────────────────────────────────────────────────
     envVars:
       - key: NODE_VERSION
         value: 20
+      - key: NODE_ENV
+        value: production
       - key: JWT_SECRET
-        generateValue: true
+        sync: false   # Set this manually in Render Dashboard → Environment
       - key: ALLOWED_ORIGINS
         value: https://alphatech-1y7.pages.dev
       - key: MOMO_SUBSCRIPTION_KEY
         value: your-momo-key-here
       - key: PORT
         value: 10000
+      # Uncomment and set this if you add a Render Persistent Disk:
+      # - key: DATABASE_PATH
+      #   value: /var/data/database.sqlite

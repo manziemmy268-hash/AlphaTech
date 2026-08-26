@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
@@ -16,12 +16,16 @@ const jwt = require('jsonwebtoken');
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 if (!process.env.JWT_SECRET) {
     if (isProduction) {
-        console.error('FATAL: JWT_SECRET must be set in production.');
+        console.error('FATAL: JWT_SECRET must be set in production. Set it in Render Dashboard → Environment.');
         process.exit(1);
     }
     console.warn('JWT_SECRET not set. Using a development fallback secret.');
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+// Tokens are valid for 7 days. This provides a buffer across short server restarts
+// while still expiring stale sessions. The /api/auth/refresh endpoint lets the
+// frontend silently renew tokens before they expire.
+const JWT_EXPIRES_IN = '7d';
 
 const PORT = process.env.PORT || (isProduction ? 3000 : 3001);
 
@@ -114,7 +118,12 @@ app.use('/api', (req, res, next) => {
 // ============================================
 // DATABASE
 // ============================================
-const db = new Database(path.join(__dirname, 'database.sqlite'));
+// DATABASE_PATH can be set to a persistent volume path on Render
+// (e.g. /var/data/database.sqlite) so the DB survives redeploys.
+// Falls back to the local file for backwards compatibility.
+const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'database.sqlite');
+console.log(`Using database at: ${DB_PATH}`);
+const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
@@ -465,12 +474,31 @@ app.post('/api/login', async (req, res) => {
 
     const token = jwt.sign(
         { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role },
-        JWT_SECRET, { expiresIn: '24h' }
+        JWT_SECRET, { expiresIn: JWT_EXPIRES_IN }
     );
 
     res.json({
         success: true,
         message: `Welcome back, ${user.username}!`,
+        token,
+        user: { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role }
+    });
+});
+
+// POST /api/auth/refresh — silently renew a valid (non-expired) token.
+// The frontend calls this on page load if the token is within 2 days of expiry.
+app.post('/api/auth/refresh', authenticateToken, (req, res) => {
+    // Fetch fresh user data so the token always has up-to-date info
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    if (!user) {
+        return res.status(401).json({ success: false, message: 'User not found.' });
+    }
+    const token = jwt.sign(
+        { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role },
+        JWT_SECRET, { expiresIn: JWT_EXPIRES_IN }
+    );
+    res.json({
+        success: true,
         token,
         user: { id: user.id, username: user.username, email: user.email, phone: user.phone, role: user.role }
     });
@@ -557,7 +585,7 @@ app.put('/api/users/me', authenticateToken, async (req, res) => {
 
     const token = jwt.sign(
         { id: user.id, username: username || user.username, email: user.email, phone: updatedPhone, role: user.role },
-        JWT_SECRET, { expiresIn: '24h' }
+        JWT_SECRET, { expiresIn: JWT_EXPIRES_IN }
     );
 
     res.json({

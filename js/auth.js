@@ -25,6 +25,50 @@ const Auth = {
         return localStorage.getItem('alphatech_jwt_token');
     },
 
+    // Decode a JWT payload without verifying signature (client-side only)
+    decodeToken: function(token) {
+        try {
+            const payload = token.split('.')[1];
+            return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+        } catch { return null; }
+    },
+
+    // Silently refresh the token if it expires within 2 days.
+    // Called on every page load to keep sessions alive across server restarts.
+    refreshTokenIfNeeded: async function() {
+        const token = this.getToken();
+        if (!token) return;
+
+        const decoded = this.decodeToken(token);
+        if (!decoded || !decoded.exp) return;
+
+        const expiresInMs = decoded.exp * 1000 - Date.now();
+        const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+
+        // Refresh if less than 2 days remain, or token already expired
+        if (expiresInMs < TWO_DAYS_MS) {
+            try {
+                const res = await fetch(`${this.API_URL}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        this.saveSession(data.token, data.user);
+                        console.log('[Auth] Token refreshed silently.');
+                    }
+                } else if (res.status === 401 || res.status === 403) {
+                    // Token is truly expired/invalid — clear session
+                    this.clearSession();
+                }
+            } catch (err) {
+                // Network error — do not clear session, user may be offline
+                console.warn('[Auth] Token refresh failed (network?):', err.message);
+            }
+        }
+    },
+
     // Register a new user via API
     register: async function(username, email, phone, password) {
         try {
@@ -189,6 +233,8 @@ const Auth = {
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.updateNavbar();
+    // Silently renew the token if it's close to expiry (runs on every page load)
+    Auth.refreshTokenIfNeeded();
 });
 
 const style = document.createElement('style');
