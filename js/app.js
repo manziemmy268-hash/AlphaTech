@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPasswordToggle();
     setupMobileNav();
     setupBackToTop();
+    setupNavbarScrollBehavior();
+    setupAnimatedCounters();
+    setupTypingEffect();
+    setupHeroParallax();
 });
 
 // Setup scroll reveal animations using Intersection Observer
@@ -189,18 +193,26 @@ async function addToCart(productId, quantity) {
 }
 
 // Wishlist toggle (stored in localStorage)
+// Updates: icon, button class, and toast
 function addToWishlist(productId) {
     const wishlist = JSON.parse(localStorage.getItem('alphatech_wishlist') || '[]');
-    const index = wishlist.indexOf(productId);
-    const icon = document.getElementById(`wishlist-icon-${productId}`);
+    const id = String(productId);
+    const index = wishlist.indexOf(id);
+
+    // Find the wishlist button for this product
+    const btn = document.querySelector(`.wishlist-btn[data-product-id="${id}"]`);
+    const icon = btn ? btn.querySelector('i') : document.getElementById(`wishlist-icon-${productId}`);
+
     if (index > -1) {
         wishlist.splice(index, 1);
-        if (icon) icon.className = 'far fa-heart';
+        if (btn) btn.classList.remove('wishlisted');
+        if (icon) { icon.className = 'far fa-heart'; }
         showToast('Removed from wishlist');
     } else {
-        wishlist.push(productId);
-        if (icon) icon.className = 'fas fa-heart';
-        showToast('Added to wishlist!');
+        wishlist.push(id);
+        if (btn) btn.classList.add('wishlisted');
+        if (icon) { icon.className = 'fas fa-heart'; }
+        showToast('&#x2764;&#xFE0F; Added to wishlist!');
     }
     localStorage.setItem('alphatech_wishlist', JSON.stringify(wishlist));
 }
@@ -411,4 +423,125 @@ function escapeHtml(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+// ── Add to cart with spinner + success animation ──────────────────────────
+async function handleAddToCartBtn(productId, btn) {
+    const originalHTML = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        await addToCart(productId, 1);
+        btn.classList.remove('loading');
+        btn.classList.add('success');
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('success');
+        }, 1600);
+    } catch {
+        btn.innerHTML = originalHTML;
+        btn.classList.remove('loading');
+    }
+}
+
+// ── Navbar scroll shrink ──────────────────────────────────────────────────
+function setupNavbarScrollBehavior() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 12);
+    }, { passive: true });
+}
+
+// ── Animated stat counters ───────────────────────────────────────────────
+function setupAnimatedCounters() {
+    const counters = document.querySelectorAll('.stat-number[data-target]');
+    if (!counters.length) return;
+
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+    function animateCounter(el) {
+        const target = parseInt(el.dataset.target, 10);
+        const suffix = el.dataset.suffix || '';
+        const duration = 1400;
+        const start = performance.now();
+
+        function step(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const value = Math.round(easeOut(progress) * target);
+            el.textContent = value.toLocaleString() + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    counters.forEach(el => observer.observe(el));
+}
+
+// ── Hero cycling typing effect ────────────────────────────────────────────
+function setupTypingEffect() {
+    const el = document.getElementById('cycling-text');
+    if (!el) return;
+
+    const phrases = [
+        '\uD83D\uDE80 New arrivals added every week',
+        '\u2713 All devices verified & in-stock',
+        '\uD83D\uDD12 Secure checkout guaranteed',
+        '\uD83D\uDCE6 Fast delivery nationwide',
+        '\u2605 Rated 4.9 / 5 by our customers',
+    ];
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    const TYPE_SPEED = 48;
+    const DELETE_SPEED = 22;
+    const PAUSE_MS = 2600;
+
+    function tick() {
+        const phrase = phrases[phraseIdx];
+        if (!deleting) {
+            charIdx++;
+            el.textContent = phrase.slice(0, charIdx);
+            if (charIdx === phrase.length) {
+                deleting = true;
+                setTimeout(tick, PAUSE_MS);
+                return;
+            }
+        } else {
+            charIdx--;
+            el.textContent = phrase.slice(0, charIdx);
+            if (charIdx === 0) {
+                deleting = false;
+                phraseIdx = (phraseIdx + 1) % phrases.length;
+            }
+        }
+        setTimeout(tick, deleting ? DELETE_SPEED : TYPE_SPEED);
+    }
+
+    // Start after short delay so entrance animation finishes first
+    setTimeout(tick, 900);
+}
+
+// ── Hero parallax (desktop only) ──────────────────────────────────────────
+function setupHeroParallax() {
+    if (window.matchMedia('(max-width: 768px)').matches) return;
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        if (scrolled < 800) {
+            hero.style.backgroundPositionY = (scrolled * 0.35) + 'px';
+        }
+    }, { passive: true });
 }

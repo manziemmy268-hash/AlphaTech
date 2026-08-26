@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,13 +39,15 @@
     </nav>
 
     <main class="container" style="padding-top: calc(var(--navbar-height) + 2rem);">
-        <header>
+        <header class="store-header-animated">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Explore Devices</h1>
             <p style="color: var(--secondary-color);">Browse premium smartphones freely, then sign in when you are ready to secure your purchase.</p>
         </header>
 
-        <button class="filter-toggle-btn" data-toggle-filters>
+        <!-- Mobile filter toggle -->
+        <button class="filter-toggle-btn" id="filter-toggle-btn" data-toggle-filters>
             <i class="fas fa-sliders-h"></i> Filters
+            <span class="filter-badge" id="filter-badge" style="display:none">0</span>
         </button>
 
         <div class="store-layout">
@@ -84,18 +86,24 @@
             <section class="store-content">
                 <div class="sort-row">
                     <p><span id="product-count">0</span> products found</p>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span>Sort by:</span>
-                        <select id="sort-select" data-sort-select>
-                            <option value="newest">Newest</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="name_asc">Name (A-Z)</option>
-                            <option value="name_desc">Name (Z-A)</option>
-                            <option value="rating">Highest Rated</option>
-                            <option value="popular">Most Popular</option>
-                        </select>
+                    <!-- Sort pill buttons — change active pill and sync the hidden select -->
+                    <div class="sort-pills" id="sort-pills" role="group" aria-label="Sort options">
+                        <button class="sort-pill active" data-sort="newest">Newest</button>
+                        <button class="sort-pill" data-sort="price_asc">Price &uarr;</button>
+                        <button class="sort-pill" data-sort="price_desc">Price &darr;</button>
+                        <button class="sort-pill" data-sort="rating"><i class="fas fa-star" style="font-size:0.72rem"></i> Rated</button>
+                        <button class="sort-pill" data-sort="popular"><i class="fas fa-fire" style="font-size:0.72rem"></i> Popular</button>
                     </div>
+                    <!-- Hidden native select still drives the existing catalog state logic -->
+                    <select id="sort-select" data-sort-select style="display:none" aria-hidden="true">
+                        <option value="newest">Newest</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
                 </div>
 
                 <div class="products-grid" id="products-grid">
@@ -120,10 +128,35 @@
     <script src="js/catalog/catalog-grid.js"></script>
     <script src="js/catalog/catalog-filters.js"></script>
     <script src="js/catalog/catalog-search.js"></script>
-    <script src="js/catalog/catalog.js"></script>
-    <script>fetch('js/footer.js').then(r=>r.text()).then(h=>{document.getElementById('shared-footer').outerHTML=h})</script>
     <script src="js/catalog/catalog-recent.js"></script>
     <script src="js/catalog/catalog-detail.js"></script>
     <script src="js/catalog/catalog.js"></script>
+    <script>fetch('js/footer.js').then(r=>r.text()).then(h=>{document.getElementById('shared-footer').outerHTML=h})</script>
+
+    <!-- Wire sort pills to the hidden select -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pills = document.querySelectorAll('.sort-pill');
+        const select = document.getElementById('sort-select');
+        if (!pills.length || !select) return;
+
+        pills.forEach(function(pill) {
+            pill.addEventListener('click', function() {
+                pills.forEach(function(p) { p.classList.remove('active'); });
+                pill.classList.add('active');
+                select.value = pill.dataset.sort;
+                // Dispatch change so catalog-filters.js picks it up
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+
+        // Keep pills in sync if select changes programmatically
+        select.addEventListener('change', function() {
+            pills.forEach(function(p) {
+                p.classList.toggle('active', p.dataset.sort === select.value);
+            });
+        });
+    });
+    </script>
 </body>
 </html>

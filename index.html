@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -23,7 +23,7 @@
         <div class="container nav-container">
             <a href="index.html" class="logo"><img src="assets/images/logo.svg" alt="AlphaTech" height="42" style="vertical-align:middle;"></a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
                 <li><a href="products.html">Store</a></li>
                 <li><a href="admin.html">Admin</a></li>
                 <li id="nav-auth-links"></li>
@@ -42,23 +42,48 @@
     </nav>
 
     <main>
+        <!-- ── Hero ── -->
         <section class="hero reveal">
-            <div class="container float-animate">
-                <div class="hero-badge"><i class="fas fa-shield-check"></i> Trusted premium smartphones • Secure checkout</div>
+            <div class="container" id="hero-content">
+                <div class="hero-badge"><i class="fas fa-shield-check"></i> Trusted premium smartphones &bull; Secure checkout</div>
                 <h1>Smartphones that feel as premium as they perform.</h1>
                 <p>Discover flagship devices, dependable support, and a buying experience designed to feel effortless from the first click.</p>
+                <div class="hero-cycling" aria-live="polite" aria-atomic="true">
+                    <span class="hero-cycling-text" id="cycling-text">&#x1F680; New arrivals added every week</span><span class="typing-cursor"></span>
+                </div>
                 <div class="hero-actions">
-                    <a href="products.html" class="btn btn-primary">Shop Now</a>
-                    <a href="#featured" class="btn btn-secondary">Explore Catalog</a>
+                    <a href="products.html" class="btn btn-primary"><i class="fas fa-store"></i> Shop Now</a>
+                    <a href="#featured" class="btn btn-secondary smooth-scroll"><i class="fas fa-compass"></i> Explore Catalog <i class="fas fa-arrow-down" style="font-size:0.75rem;opacity:0.7"></i></a>
                 </div>
                 <div class="trust-bar">
-                    <span class="trust-pill"><i class="fas fa-box-open"></i> Fast delivery</span>
-                    <span class="trust-pill"><i class="fas fa-mobile-screen"></i> Verified stock</span>
-                    <span class="trust-pill"><i class="fas fa-lock"></i> Secure payments</span>
+                    <a href="products.html" class="trust-pill"><i class="fas fa-box-open"></i> Fast delivery</a>
+                    <a href="products.html" class="trust-pill"><i class="fas fa-mobile-screen"></i> Verified stock</a>
+                    <a href="checkout.html" class="trust-pill"><i class="fas fa-lock"></i> Secure payments</a>
                 </div>
             </div>
         </section>
 
+        <!-- ── Stats Strip ── -->
+        <section class="stats-strip reveal" aria-label="Store highlights">
+            <div class="stat-item">
+                <span class="stat-number" data-target="500" data-suffix="+">0</span>
+                <span class="stat-label">Devices listed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="10" data-suffix="">0</span>
+                <span class="stat-label">Premium brands</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="2000" data-suffix="+">0</span>
+                <span class="stat-label">Happy customers</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="24" data-suffix="/7">0</span>
+                <span class="stat-label">Support available</span>
+            </div>
+        </section>
+
+        <!-- ── Featured ── -->
         <section id="featured" class="container reveal">
             <div class="section-heading">
                 <div>
@@ -72,6 +97,7 @@
             </div>
         </section>
 
+        <!-- ── Trending ── -->
         <section id="trending" class="container reveal">
             <div class="section-heading">
                 <div>
@@ -85,22 +111,26 @@
             </div>
         </section>
 
+        <!-- ── Feature Cards ── -->
         <section class="container reveal">
             <div class="feature-grid">
                 <div class="feature-card">
                     <i class="fas fa-star"></i>
                     <h3>Premium selection</h3>
                     <p>Choose from carefully curated smartphones built for performance, style, and everyday reliability.</p>
+                    <a href="products.html" class="feature-cta">Browse devices <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-headset"></i>
                     <h3>Friendly support</h3>
                     <p>Need help choosing a device? Our team is here to make your decision simple and stress-free.</p>
+                    <a href="mailto:hello@alphatech.com" class="feature-cta">Contact us <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-truck-fast"></i>
                     <h3>Confidence in every order</h3>
                     <p>Enjoy transparent stock updates, dependable delivery, and a smooth checkout experience.</p>
+                    <a href="orders.html" class="feature-cta">Track orders <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </section>
@@ -127,7 +157,7 @@
                     <ul>
                         <li><a href="mailto:hello@alphatech.com">Contact Us</a></li>
                         <li><a href="products.html">Shipping Info</a></li>
-                        <li><a href="products.html">Returns & Warranty</a></li>
+                        <li><a href="products.html">Returns &amp; Warranty</a></li>
                     </ul>
                 </div>
             </div>
@@ -143,7 +173,6 @@
     <script src="js/catalog/catalog-api.js"></script>
     <script src="js/catalog/catalog-state.js"></script>
     <script src="js/catalog/catalog-ui.js"></script>
-    <script src="js/catalog/catalog-detail.js"></script>
     <script src="js/catalog/catalog-recent.js"></script>
     <script src="js/catalog/catalog.js"></script>
     <script>

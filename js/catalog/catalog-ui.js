@@ -1,4 +1,4 @@
-﻿const CatalogUI = {
+const CatalogUI = {
     stars(rating) {
         const r = Math.round(rating || 0);
         return '<span class="stars" aria-label="' + r + ' out of 5 stars">' +
@@ -16,8 +16,19 @@
 
     card(product, opts = {}) {
         const imgSrc = getProductImageSrc(product.image);
+        const isOutOfStock = product.stock <= 0;
+
+        // Check wishlist state from localStorage
+        const wishlist = JSON.parse(localStorage.getItem('alphatech_wishlist') || '[]');
+        const isWishlisted = wishlist.includes(String(product.id));
+
+        // Stock urgency: show when ≤5 but not zero
+        const stockUrgency = (!isOutOfStock && product.stock <= 5)
+            ? `<div class="stock-urgency"><i class="fas fa-fire"></i> Only ${product.stock} left!</div>`
+            : '';
+
         return `
-            <div class="product-card reveal" role="article" aria-label="${product.name}">
+            <div class="product-card reveal${isOutOfStock ? ' is-out-of-stock' : ''}" role="article" aria-label="${product.name}">
                 <div style="position:relative">
                     <a href="product.html?id=${product.id}" aria-label="View ${product.name}">
                         <img src="${imgSrc}" alt="${product.name}" class="product-image"
@@ -26,23 +37,36 @@
                             onerror="handleProductImageError(this)">
                     </a>
                     ${this.badge(product.badge)}
-                    ${product.stock <= 0 ? '<span style="position:absolute;top:0.5rem;right:0.5rem;background:rgba(0,0,0,0.6);color:#fff;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px">Out of Stock</span>' : ''}
-                    ${product.featured ? '<span style="position:absolute;top:0.5rem;left:0.5rem;background:#0071e3;color:#fff;font-size:0.65rem;padding:0.2rem 0.5rem;border-radius:4px;font-weight:600">Featured</span>' : ''}
+                    ${isOutOfStock ? '<span style="position:absolute;top:0.5rem;right:2.8rem;background:rgba(0,0,0,0.65);color:#fff;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;backdrop-filter:blur(4px)">Out of Stock</span>' : ''}
+                    ${product.featured && !product.badge ? '<span style="position:absolute;top:0.5rem;left:0.5rem;background:#0071e3;color:#fff;font-size:0.65rem;padding:0.2rem 0.5rem;border-radius:4px;font-weight:600">Featured</span>' : ''}
+                    <button class="wishlist-btn${isWishlisted ? ' wishlisted' : ''}"
+                        data-product-id="${product.id}"
+                        onclick="addToWishlist(${product.id})"
+                        aria-label="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}"
+                        title="${isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}">
+                        <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
+                    </button>
                 </div>
                 <div style="padding:0 1rem 1rem">
                     <span class="product-brand">${product.brand || ''}</span>
                     <h3 class="product-name" style="margin:0.2rem 0">
                         <a href="product.html?id=${product.id}" style="color:inherit;text-decoration:none">${product.name}</a>
                     </h3>
-                    <div style="font-size:0.8rem;margin-bottom:0.5rem">
+                    <div style="font-size:0.8rem;margin-bottom:0.3rem">
                         ${this.stars(product.average_rating)}
                         <span style="color:var(--secondary-color)">(${product.review_count || 0})</span>
                     </div>
+                    ${stockUrgency}
                     <p class="product-price">$${Number(product.price).toLocaleString()}</p>
                     <div style="display:flex;gap:0.5rem;padding-bottom:0.5rem">
-                        <a href="product.html?id=${product.id}" class="btn" style="border:1px solid var(--primary-color);color:var(--primary-color);flex:1;text-decoration:none;text-align:center">Details</a>
-                        <button class="btn btn-primary" style="flex:1" onclick="handleAddToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''} aria-label="Add ${product.name} to cart">
-                            ${product.stock === 0 ? '<i class="fas fa-times"></i>' : '<i class="fas fa-cart-plus"></i>'}
+                        <a href="product.html?id=${product.id}" class="btn" style="border:1px solid var(--primary-color);color:var(--primary-color);flex:1;text-decoration:none;text-align:center">
+                            <i class="fas fa-eye" style="margin-right:0.3rem"></i>View
+                        </a>
+                        <button class="btn btn-primary btn-add-cart" style="flex:1"
+                            onclick="handleAddToCartBtn(${product.id}, this)"
+                            ${isOutOfStock ? 'disabled' : ''}
+                            aria-label="Add ${product.name} to cart">
+                            ${isOutOfStock ? '<i class="fas fa-ban"></i>' : '<i class="fas fa-cart-plus"></i>'}
                         </button>
                     </div>
                 </div>
