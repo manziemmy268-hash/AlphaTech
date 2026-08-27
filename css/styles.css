@@ -557,15 +557,15 @@ footer {
 .hamburger span {
     display: block;
     width: 100%;
-    height: 2.5px;
-    background: var(--text-color);
-    border-radius: 2px;
+    height: 3px;
+    background: var(--primary-color);
+    border-radius: 3px;
     transition: all 0.3s ease;
     transform-origin: center;
 }
 
 .hamburger.active span:nth-child(1) {
-    transform: translateY(7.5px) rotate(45deg);
+    transform: translateY(8px) rotate(45deg);
 }
 
 .hamburger.active span:nth-child(2) {
@@ -573,7 +573,7 @@ footer {
 }
 
 .hamburger.active span:nth-child(3) {
-    transform: translateY(-7.5px) rotate(-45deg);
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 /* Mobile Nav Overlay */
