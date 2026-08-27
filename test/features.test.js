@@ -31,25 +31,35 @@ async function request(path, { method = 'GET', token, body } = {}) {
 }
 
 // Track created entities so we can clean them up after the run.
+// Each entry is { email, password } — password tracks the account's *current*
+// password so cleanup still works even if a test changed it.
 const cleanup = {
     users: [],
-    carts: [],
 };
 
 after(async () => {
-    // Best-effort cleanup of any users we created.
-    for (const email of cleanup.users) {
+    // Best-effort cleanup of any users we created. Deleting a user cascades to
+    // their cart_items/orders/reviews (ON DELETE CASCADE), so account deletion
+    // fully removes test data.
+    for (const { email, password } of cleanup.users) {
         try {
             const login = await request('/api/login', {
                 method: 'POST',
-                body: { email, password: 'Test1234!' },
+                body: { email, password },
             });
             if (login.json && login.json.token) {
-                await request('/api/users/me', { method: 'DELETE', token: login.json.token, body: { password: 'Test1234!' } });
+                await request('/api/users/me', { method: 'DELETE', token: login.json.token, body: { password } });
             }
         } catch { /* ignore cleanup errors */ }
     }
 });
+
+// Update the tracked password for an email so cleanup stays accurate after
+// a test changes the user's password.
+function trackPassword(email, newPassword) {
+    const rec = cleanup.users.find((u) => u.email === email);
+    if (rec) rec.password = newPassword;
+}
 
 // ============================================================
 // HEALTH
@@ -65,7 +75,7 @@ test('health endpoint reports UP', async () => {
 // ============================================================
 async function makeUser() {
     const email = `test${RUN}-${Math.random().toString(36).slice(2, 8)}@example.com`;
-    cleanup.users.push(email);
+    cleanup.users.push({ email, password: 'Test1234!' });
     const reg = await request('/api/register', {
         method: 'POST',
         body: { username: 'Test User', email, password: 'Test1234!' },
@@ -268,7 +278,6 @@ async function userWithToken() {
     const login = await request('/api/login', { method: 'POST', body: { email, password: 'Test1234!' } });
     return { token: login.json.token, email };
 }
-
 test('cart: add item, list, update, remove, clear', async () => {
     const { token } = await userWithToken();
 
@@ -435,7 +444,7 @@ test('users/me: update profile name and phone', async () => {
 });
 
 test('users/me: changing password requires correct old password', async () => {
-    const { token } = await userWithToken();
+    const { token, email } = await userWithToken();
     const bad = await request('/api/users/me', {
         method: 'PUT',
         token,
@@ -449,4 +458,6 @@ test('users/me: changing password requires correct old password', async () => {
         body: { oldPassword: 'Test1234!', newPassword: 'NewPass123!' },
     });
     assert.equal(good.status, 200);
+    // Record the new password so cleanup can still delete this account.
+    trackPassword(email, 'NewPass123!');
 });
