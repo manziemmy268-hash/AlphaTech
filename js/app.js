@@ -156,11 +156,12 @@ function handleProductImageError(img) {
 }
 
 // Cart management shared functions
+// Returns { success: true } on success, or { success: false, message } on failure.
 async function addToCart(productId, quantity) {
     if (!Auth.isLoggedIn()) {
         showToast('Please login to add items to cart.');
         setTimeout(() => window.location.href = 'login.html', 1500);
-        return;
+        return { success: false, message: 'Please login to add items to cart.' };
     }
 
     const qty = Math.max(1, Math.min(99, Number(quantity) || 1));
@@ -176,19 +177,24 @@ async function addToCart(productId, quantity) {
         });
         if (res.status === 401 || res.status === 403) {
             Auth.handleAuthFailure('Session expired. Please log in again.');
-            return;
+            return { success: false, message: 'Session expired. Please log in again.' };
         }
         const result = await readJsonResponse(res, 'Unable to add to cart');
         if (result.success) {
             updateCartCount();
             showToast('Item added to cart!');
+            return { success: true };
         } else {
-            showToast(result.message || 'Error adding to cart');
+            const msg = result.message || 'Error adding to cart';
+            showToast(msg);
+            return { success: false, message: msg };
         }
     } catch (err) {
         console.error('Cart add error:', err);
         console.error('Cart add details:', { message: err.message, stack: err.stack, name: err.name });
-        showToast('Server error: ' + (err.message || 'Unable to add to cart'));
+        const msg = 'Server error: ' + (err.message || 'Unable to add to cart');
+        showToast(msg);
+        return { success: false, message: msg };
     }
 }
 
@@ -427,11 +433,12 @@ function escapeHtml(value) {
 
 // ── Add to cart with spinner + success animation ──────────────────────────
 async function handleAddToCartBtn(productId, btn) {
+    if (btn.classList.contains('loading')) return;
     const originalHTML = btn.innerHTML;
     btn.classList.add('loading');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    try {
-        await addToCart(productId, 1);
+    const result = await addToCart(productId, 1);
+    if (result && result.success) {
         btn.classList.remove('loading');
         btn.classList.add('success');
         btn.innerHTML = '<i class="fas fa-check"></i>';
@@ -439,7 +446,7 @@ async function handleAddToCartBtn(productId, btn) {
             btn.innerHTML = originalHTML;
             btn.classList.remove('success');
         }, 1600);
-    } catch {
+    } else {
         btn.innerHTML = originalHTML;
         btn.classList.remove('loading');
     }
