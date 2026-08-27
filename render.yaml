@@ -23,6 +23,7 @@ services:
         value: your-momo-key-here
       - key: PORT
         value: 10000
-      # Uncomment and set this if you add a Render Persistent Disk:
-      # - key: DATABASE_PATH
-      #   value: /var/data/database.sqlite
+      # Supabase Postgres connection string. Set this in Render Dashboard →
+      # Environment, e.g. postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres
+      - key: DATABASE_URL
+        sync: false   # Set this manually in Render Dashboard → Environment
